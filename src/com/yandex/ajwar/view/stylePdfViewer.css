@@ -1,0 +1,287 @@
+/*.button {
+    //-fx-padding: 5 22 5 22;
+    -fx-border-color: #e2e2e2;
+    -fx-border-width: 2;
+    -fx-background-radius: 0;
+    -fx-background-color: #1d1d1d;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 9pt;
+    -fx-text-fill: #d8d8d8;
+    -fx-background-insets: 0 0 0 0, 0, 1, 2;
+}*/
+/*.background{
+    -fx-background-image: url("resources.images/background.jpg");
+}*/
+/*#buttonWithImage {
+    -fx-background-image: url('resources.images/new_button.png');
+    -fx-background-size: 15px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: 90%;
+}*/
+.backgroundPdfView{
+    -fx-background-image: url("../../../../resources/images/backgroundMainWindow.jpg");
+}
+.backgroundPdfView:top .tab-header-area .tab-header-background{
+    /*-fx-background-image: url("backgroundMainWindow.jpg");*/
+}
+.split-pane:horizontal .split-pane-divider{
+//    -fx-background-color: #d9ffe8;
+}
+/*Стили на Лабел*/
+
+#labelLeftImages{
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+}
+.label{
+    -fx-font-family: "Arial Narrow";
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+    -fx-text-fill: black;
+}
+
+
+/*Стили на Баттоны*/
+
+.custom-button {
+    -fx-background-radius: 15;
+    -fx-border-color: #0825ff;
+    -fx-border-radius: 15;
+    -fx-border-width: 1.5;
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+    -fx-font-weight: bold;
+    -fx-font-size: 13;
+    -fx-background-color: linear-gradient(#61a2b1, #2A5058);
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+}
+.custom-button:hover {
+    -fx-background-color: linear-gradient(#2A5058, #61a2b1);
+    -fx-cursor:hand;
+}
+
+
+
+/*Стили на ТабПэйны*/
+.specialTab .tab-label{
+    -fx-text-fill:white;
+}
+
+.specialTab :selected .tab-label{
+    -fx-border-radius:15.0 15.0 0.0 0.0;
+    -fx-text-fill:white;
+    -fx-padding: 15.0 15.0 0.0 0.0;
+}
+.specialTab {
+    -fx-background-color: #69ff2e;
+    -fx-background-radius:15.0 15.0 0.0 0.0;
+    -fx-border-color: #0c0eff;
+    -fx-border-width: 1.5;
+    -fx-border-radius:15.0 15.0 0.0 0.0;
+    -fx-font-family: "Arial Narrow";
+    -fx-background-color: linear-gradient(#03b126, #143458);
+    /*    -fx-padding:3.0em 0.0em 3.0em 0.0em;*/
+    -fx-font-size: 14;
+    -fx-font-weight:bold;
+/*    -fx-fill-width: bold;*/
+    -fx-cursor:hand;
+    -fx-effect: innershadow(two-pass-box, #fffbb5, 15.0, 0.0, 0.0, 0.0);
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected
+{
+    -fx-focus-color:transparent;
+}
+/*.backgroundPdfView:top .tab-header-area .headers-region .specialTab:top:selected{
+    -fx-padding: 2 2 0 0;
+}*/
+
+.specialTab:hover{
+    -fx-background-color: linear-gradient(#70f1ff, #1336b1);
+}
+.specialTab:top .tab-header-area .headers-region{
+    -fx-background-radius:40.0 40.0 0.0 0.0;
+    -fx-border-radius:40.0 40.0 0.0 0.0;
+}
+
+
+
+/*Стили на Пэгинацион*/
+.circle-pagination{
+    -fx-base: #6a676f;
+}
+.circle-pagination .toggle-button , .circle-pagination.button{
+    -fx-background-radius:15px;
+    -fx-padding: 0px;
+}
+.circle-pagination .button{
+    -fx-padding: 5 15 5 15px;
+}
+
+.circle-pagination .label {
+    -fx-text-fill:white;
+}
+
+.custom-text-field
+{
+    -fx-background-color: #ff192f, #32d821, rgb(31, 12, 255), white;
+    -fx-background-radius: 0, 0, 0, 0;
+    -fx-padding: 2px;
+}
+
+.custom-text-field:hover
+{
+/*    -fx-background-color: transparent, #909090, transparent, white;*/
+    -fx-background-radius: 0, 0, 0, 0;
+    -fx-padding: 2px;
+}
+
+.custom-text-field:focused
+{
+  /*-fx-background-color: transparent, #009EF, transparent, white;*/
+    -fx-background-radius: 0, 0, 0, 0;
+    -fx-padding: 2px;
+}
+
+
+
+.textFieldPdfView {
+    -fx-background-color: #ffbbbb;
+    -fx-border-color: #f00;
+}
+
+
+/*Стили на КомбоБоксы*/
+/*.comboBoxTest .list-cell
+{
+    -fx-background: #ff1850;
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-base-color;
+    -fx-padding: 3 0 2 7;
+    -fx-cell-size: 1.66667em;
+}*/
+
+
+/*.comboBoxPdfView .list-view .list-cell
+{
+    -fx-padding: 4 0 4 5;
+
+    !* No alternate highlighting *!
+    -fx-background-color: rgba(255, 19, 236, 0.56);
+}*/
+
+
+/*.comboBoxPdfView .list-view .list-cell:filled:hover
+{
+    -fx-background-color: #0eff34;
+    -fx-text-fill: -fx-text-inner-color;
+}*/
+
+/*.combo-box .list-cell
+{
+    -fx-background: #97faff;
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-base-color;
+    -fx-padding: 3 0 2 7;
+    -fx-cell-size: 1.66667em;
+}
+
+.combo-box-popup .list-view
+{
+    -fx-background-color: #0c0eff, #ff164a;
+    -fx-background-insets: 0, 1;
+    -fx-effect: dropshadow( three-pass-box , rgba(138, 216, 63, 0.6), 8, 0.0 , 0 , 0 );
+}
+
+.combo-box-popup .list-view .list-cell
+{
+    -fx-padding: 4 0 4 5;
+
+    !* No alternate highlighting *!
+    -fx-background-color: #2a3cff;
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected, .combo-box-popup .list-view .list-cell:filled:selected:hover
+{
+    -fx-background: -fx-accent;
+    -fx-background-color: -fx-selection-bar;
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+.combo-box-popup .list-view .list-cell:filled:hover
+{
+    -fx-background-color: #34ff47;
+    -fx-text-fill: -fx-text-inner-color;
+}
+
+.combo-box-base
+{
+    -fx-skin: "com.sun.javafx.scene.control.skin.ComboBoxBaseSkin";
+    -fx-background-color: #1f14ff, #c5ff92, #36ff78, #8ad83f;
+    -fx-background-radius: 5, 5, 4, 3;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
+    -fx-padding: 0;
+}
+
+.combo-box-base:hover
+{
+    -fx-color: -fx-hover-base;
+}
+
+.combo-box-base:showing
+{
+    -fx-color: -fx-pressed-base;
+}
+
+.combo-box-base:focused {
+    -fx-background-color: -fx-focus-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-background-radius: 6.4, 4, 5, 3;
+    -fx-background-insets: -1.4, 0, 1, 2;
+}
+
+.combo-box-base:disabled {
+    -fx-opacity: .4;
+}*/
+
+
+
+
+
+
+.comboBoxPdfView
+{
+    -fx-background-color: rgb(12, 213, 255), #1f0cff, #110108, rgba(138, 216, 63, 0.99);
+    -fx-background-radius: 6.4, 4, 5, 3;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
+    -fx-padding: 0;
+    -fx-cursor: open_hand;
+    -fx-effect: dropshadow( three-pass-box , rgba(38, 182, 216, 0.6), 8, 0.0 , 0 , 0 );
+}
+.comboBoxPdfView .combo-box-popup .list-view
+{
+    -fx-effect: dropshadow( three-pass-box , rgba(138, 216, 63, 0.6), 8, 0.0 , 0 , 0 );
+}
+.comboBoxPdfView:hover
+{
+    -fx-color: -fx-hover-base;
+}
+
+.comboBoxPdfView:showing
+{
+    -fx-color: -fx-pressed-base;
+}
+
+.comboBoxPdfView:focused {
+    -fx-background-color: -fx-focus-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-background-radius: 6.4, 4, 5, 3;
+    -fx-background-insets: -1.4, 0, 1, 2;
+}
+
+.comboBoxPdfView:disabled {
+    -fx-opacity: .4;
+}
+
+
+
+

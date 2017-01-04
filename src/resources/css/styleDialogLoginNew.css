@@ -1,0 +1,35 @@
+/*.dialogLogin{
+    -fx-background-image: url("background.jpg");
+}
+.dialogLogin:header *.header-panel{
+    -fx-background-color: #7dff8c;
+    !*-fx-background-image: url("../resources.images/background.jpg");*!
+}*/
+/*.dialog-pane:header *.header-panel{
+    -fx-background-color: #7dff8c
+}*/
+.button {
+    -fx-background-radius: 15;
+    -fx-border-color: #0825ff;
+    -fx-border-radius: 15;
+    -fx-border-width: 1;
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-background-color: linear-gradient(#61a2b1, #2A5058);
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+}
+.button:hover {
+    -fx-background-color: linear-gradient(#2A5058, #61a2b1);
+}
+.label-custom{
+    -fx-font-size: 14.5;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+}
+/*
+.root{
+    -fx-background-color: #7dff8c;
+}*/

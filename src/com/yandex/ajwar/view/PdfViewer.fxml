@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.control.ScrollPane?>
+<TabPane prefHeight="800.0" prefWidth="1200.0" styleClass="backgroundPdfView" stylesheets="@stylePdfViewer.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yandex.ajwar.view.PdfViewerController">
+    <tabs>
+        <Tab closable="false" styleClass="specialTab" text="    Сканирование КД    ">
+            <content>
+                <AnchorPane prefHeight="500.0" prefWidth="800.0" styleClass="backgroundPdfView">
+                    <children>
+                        <SplitPane cache="true" cacheHint="SPEED" dividerPositions="0.3" layoutX="248.0" layoutY="74.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <items>
+                                <AnchorPane maxWidth="-Infinity" minWidth="300.0" prefHeight="400.0" prefWidth="300.0" styleClass="backgroundPdfView">
+                                    <children>
+                                        <VBox prefHeight="819.0" prefWidth="300.0" spacing="3.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <children>
+                                                <TableView fx:id="listFileTable" onMouseClicked="#onMouseClickedTableListFile" prefHeight="250.0" prefWidth="300.0">
+                                                    <columns>
+                                                        <TableColumn fx:id="filePathColumn" editable="false" minWidth="-1.0" prefWidth="-1.0" text="Список файлов" />
+                                                    </columns>
+                                                    <opaqueInsets>
+                                                        <Insets />
+                                                    </opaqueInsets>
+                                                    <columnResizePolicy>
+                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                                    </columnResizePolicy>
+                                                </TableView>
+                                                <HBox>
+                                                    <children>
+                                                        <Button maxHeight="25.0" mnemonicParsing="false" onAction="#updateTableView" styleClass="custom-button" text="Обновить">
+                                             <graphic>
+                                                <ImageView fx:id="imageViewPdfView" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../../../resources/images/Refresh.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                             <tooltip>
+                                                <Tooltip text="Обновляет список файлов в выбранной директории." />
+                                             </tooltip>
+                                          </Button>
+                                                        <Label alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="100.0" styleClass="labelBold" text="Всего файлов:" wrapText="true" />
+                                                        <Label fx:id="countFileLabel" prefHeight="25.0" styleClass="labelBold" />
+                                                    </children>
+                                                </HBox>
+                                                <Label prefHeight="15.0" />
+                                                <HBox>
+                                                    <children>
+                                                        <Label alignment="CENTER" prefHeight="25.0" prefWidth="100.0" text="Формат" />
+                                                        <ComboBox fx:id="comboBoxMaskPdfViewController" maxWidth="200.0" prefWidth="200.0" styleClass="comboBoxPdfView">
+                                             <effect>
+                                                <DropShadow />
+                                             </effect>
+                                          </ComboBox>
+                                                    </children>
+                                                </HBox>
+                                                <HBox layoutX="10.0" layoutY="302.0">
+                                                    <children>
+                                                        <Label alignment="CENTER" minWidth="97.0" prefHeight="25.0" prefWidth="100.0" text="Обозначение" />
+                                                        <TextField fx:id="textFieldDesignation" maxWidth="200.0" minWidth="197.0" prefWidth="200.0" promptText="Обозначение" styleClass="errorTextField">
+                                             <tooltip>
+                                                <Tooltip fx:id="tooltipDesignationPdfView" text="Допускается ввод любого обозначения." />
+                                             </tooltip>
+                                          </TextField>
+                                          <Label fx:id="labelDopNumberPdfView" prefHeight="25.0" />
+                                          <TextField fx:id="textFieldDopNumberPdfView" visible="false">
+                                             <tooltip>
+                                                <Tooltip text="Допускается ввод числа до 100 (включительно)." />
+                                             </tooltip></TextField>
+                                                    </children>
+                                                </HBox>
+                                                <HBox layoutX="10.0" layoutY="327.0">
+                                                    <children>
+                                                        <Label alignment="CENTER" prefHeight="25.0" prefWidth="100.0" text="Тип документа" />
+                                                        <ComboBox fx:id="comboBoxDocTypesPdfViewController" cache="true" maxWidth="200.0" prefHeight="25.0" prefWidth="200.0" styleClass="comboBoxPdfView" />
+                                                    </children>
+                                                </HBox>
+                                                <HBox spacing="5.0">
+                                                    <children>
+                                                        <Button fx:id="buttonDeductNamePdfView" disable="true" mnemonicParsing="false" onAction="#checkNameOfDesignation" prefHeight="28.0" styleClass="custom-button" text=" Вывод наим.">
+                                             <tooltip>
+                                                <Tooltip text="Выводит нименование предыдущего заказа." />
+                                             </tooltip></Button>
+                                                        <Button id="buttonWithImage" fx:id="buttonCheckDesignation" disable="true" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#checkDesignation" prefHeight="28.0" styleClass="custom-button" text="Проверить">
+                                             <tooltip>
+                                                <Tooltip text="Проверяет,есть ли в Search документ с таким обозначением." />
+                                             </tooltip></Button>
+                                                        <Button fx:id="buttonListVersion" disable="true" layoutX="62.0" layoutY="10.0" mnemonicParsing="false" onAction="#checkVersionListDoc" prefHeight="25.0" styleClass="custom-button" text="Список версий">
+                                             <tooltip>
+                                                <Tooltip text="Выводит список версий документа." />
+                                             </tooltip></Button>
+                                                    </children>
+                                                </HBox>
+                                                <TabPane prefHeight="376.0" prefWidth="300.0" styleClass="backgroundPdfView" tabClosingPolicy="UNAVAILABLE">
+                                                    <tabs>
+                                                        <Tab styleClass="specialTab" text="   Новый    ">
+                                                            <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                                                    <children>
+                                                                        <VBox prefWidth="294.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                            <children>
+                                                                                <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="25.0" prefWidth="300.0" text="Параметры" underline="true">
+                                                                                    <VBox.margin>
+                                                                                        <Insets />
+                                                                                    </VBox.margin>
+                                                                                    <font>
+                                                                                        <Font name="Century" size="14.0" />
+                                                                                    </font>
+                                                                                </Label>
+                                                                                <Label prefHeight="25.0" text="Наименование" />
+                                                                                <TextArea fx:id="textAreaName" prefHeight="60.0" prefWidth="294.0" promptText="Наименование" />
+                                                                                <HBox prefHeight="25.0" prefWidth="200.0">
+                                                                                    <children>
+                                                                                        <Label prefHeight="25.0" text="Количество листов:" wrapText="true" />
+                                                                                        <Label fx:id="labelNumberOfSheets" prefHeight="25.0" />
+                                                                                    </children>
+                                                                                </HBox>
+                                                                                <HBox alignment="TOP_RIGHT" layoutX="10.0" layoutY="160.0" prefHeight="25.0" prefWidth="200.0">
+                                                                                    <children>
+                                                                                        <Label alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="79.0" text="Формат:" />
+                                                                                        <ComboBox fx:id="comboBoxFormatPdfViewController" prefHeight="25.0" prefWidth="102.0" styleClass="comboBoxPdfView" />
+                                                                                        <CheckBox fx:id="checkBoxArbitrarily" mnemonicParsing="false" prefHeight="25.0" prefWidth="109.0" text="Произвольно" />
+                                                                                    </children>
+                                                                                </HBox>
+                                                                                <Separator minHeight="10.0" />
+                                                                                <Label alignment="CENTER" prefHeight="25.0" prefWidth="300.0" text="Статус ОТД" underline="true" />
+                                                            <HBox>
+                                                               <children>
+                                                                  <Label alignment="CENTER" prefHeight="25.0" prefWidth="172.0" underline="true" />
+                                                                                      <CheckBox fx:id="checkBoxRegOtd" mnemonicParsing="false" prefHeight="25.0" prefWidth="300.0" selected="true" text="Зарегистрировать" />
+                                                               </children>
+                                                            </HBox>
+                                                                                <HBox>
+                                                                                    <children>
+                                                                                        <Label alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="74.0" text="Дата" />
+                                                                                        <DatePicker fx:id="datePickerOtdNew" prefHeight="25.0" showWeekNumbers="true">
+                                                                     <styleClass>
+                                                                        <String fx:value="calendar-cell-today" />
+                                                                        <String fx:value="calendar-cell-selected" />
+                                                                        <String fx:value="calendar-cell" />
+                                                                        <String fx:value="calendar-cell-inactive" />
+                                                                     </styleClass>
+                                                                  </DatePicker>
+                                                                                    </children>
+                                                                                </HBox>
+                                                            <Label alignment="CENTER" prefHeight="10.0" prefWidth="300.0" />
+                                                                                <Button fx:id="buttonExportInSearch" alignment="CENTER" disable="true" mnemonicParsing="false" onAction="#exportInSearch" prefHeight="25.0" styleClass="custom-button" text="Экспорт в Search">
+                                                               <graphic>
+                                                                  <ImageView cache="true" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                                     <image>
+                                                                        <Image url="@../../../../resources/images/add_doc_in_search.png" />
+                                                                     </image>
+                                                                  </ImageView>
+                                                               </graphic>
+                                                               <tooltip>
+                                                                  <Tooltip text="Экспорт в Search с выбранными параметрами." />
+                                                               </tooltip>
+                                                            </Button>
+                                                                            </children>
+                                                                        </VBox>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                            </content>
+                                                        </Tab>
+                                                        <Tab styleClass="specialTab" text="   Версия   ">
+                                                            <content>
+                                                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="354.0" prefWidth="300.0">
+                                                                    <children>
+                                                                        <VBox prefWidth="300.0" AnchorPane.leftAnchor="0.0">
+                                                                            <children>
+                                                                                <VBox prefHeight="50.0" prefWidth="117.0">
+                                                                                    <children>
+                                                                                        <HBox>
+                                                                                            <children>
+                                                                                                <Label prefHeight="25.0" prefWidth="150.0" text="№ изменения" />
+                                                                                                <Label layoutX="10.0" layoutY="10.0" prefHeight="25.0" prefWidth="150.0" text="Срок изменения" />
+                                                                                            </children>
+                                                                                        </HBox>
+                                                                                        <HBox layoutX="10.0" layoutY="10.0" prefHeight="25.0" prefWidth="219.0">
+                                                                                            <children>
+                                                                                                <TextField fx:id="textFieldNumberChange" maxWidth="80.0" minWidth="80.0" prefHeight="25.0" promptText="№ изменения">
+                                                                           <tooltip>
+                                                                              <Tooltip text="Номер изменнения новой версии документа." />
+                                                                           </tooltip></TextField>
+                                                                                                <Label minHeight="25.0" minWidth="70.0" />
+                                                                                                <DatePicker fx:id="datePickerTermChange" />
+                                                                                            </children>
+                                                                                        </HBox>
+                                                                                    </children>
+                                                                                </VBox>
+                                                                                <Label alignment="CENTER" prefHeight="25.0" prefWidth="300.0" text="Причина изменения" underline="true" />
+                                                                                <ComboBox fx:id="comboBoxChangeReasonPdfViewController" styleClass="comboBoxPdfView" />
+                                                                                <CheckBox fx:id="checkBoxNoteVersion" mnemonicParsing="false" prefHeight="25.0" selected="true" text="Комментарий" />
+                                                                                <TextArea fx:id="textAreaNote" prefHeight="60.0" prefWidth="300.0" promptText="Комментарий" />
+                                                                                <Pane>
+                                                                                    <children>
+                                                                                        <HBox>
+                                                                                            <children>
+                                                                                                <VBox maxWidth="135.0" spacing="2.0">
+                                                                                                    <children>
+                                                                                                        <Label alignment="CENTER" prefHeight="17.0" prefWidth="135.0" text="Актуализация" underline="true" />
+                                                                                                        <RadioButton fx:id="radioButtonTermChange" layoutX="10.0" layoutY="44.0" mnemonicParsing="false" selected="true" text="По сроку изменения">
+                                                                                                            <toggleGroup>
+                                                                                                                <ToggleGroup fx:id="toggleCroupAction" />
+                                                                                                            </toggleGroup>
+                                                                                                        </RadioButton>
+                                                                                                        <RadioButton fx:id="radioButtonActualNow" layoutX="10.0" layoutY="27.0" mnemonicParsing="false" text="Сделать актуальной" toggleGroup="$toggleCroupAction" />
+                                                                                                        <RadioButton fx:id="radioButtonNotActual" mnemonicParsing="false" text="Не актуализировать" toggleGroup="$toggleCroupAction" />
+                                                                                                    </children>
+                                                                                                </VBox>
+                                                                                                <Separator maxWidth="4.0" orientation="VERTICAL">
+                                                                           <padding>
+                                                                              <Insets left="1.0" />
+                                                                           </padding>
+                                                                        </Separator>
+                                                                                                <VBox>
+                                                                                                    <children>
+                                                                                                        <HBox>
+                                                                                                            <children>
+                                                                                                                <Label prefHeight="25.0" text="Зарегистрировать в ОТД " />
+                                                                                                                <CheckBox fx:id="checkBoxRegOtdVersion" mnemonicParsing="false" prefHeight="25.0" selected="true" underline="true" wrapText="true">
+                                                                                                                    <font>
+                                                                                                                        <Font size="11.0" />
+                                                                                                                    </font>
+                                                                                                                </CheckBox>
+                                                                                                            </children>
+                                                                                                        </HBox>
+                                                                                                        <HBox maxWidth="159.0">
+                                                                                                            <children>
+                                                                                                                <Label minWidth="-Infinity" prefHeight="25.0" text="Дата " />
+                                                                                                                <DatePicker fx:id="datePickerOtdVersion" prefHeight="25.0" prefWidth="125.0">
+                                                                                                                    <HBox.margin>
+                                                                                                                        <Insets />
+                                                                                                                    </HBox.margin>
+                                                                                                                </DatePicker>
+                                                                                                            </children>
+                                                                                                        </HBox>
+                                                                                                    </children>
+                                                                           <padding>
+                                                                              <Insets right="-6.0" />
+                                                                           </padding>
+                                                                                                </VBox>
+                                                                                            </children>
+                                                                                        </HBox>
+                                                                                    </children>
+                                                                                </Pane>
+                                                                                <Label minHeight="12.0" />
+                                                                                <Button fx:id="buttonAddVersionInSearch" disable="true" mnemonicParsing="false" onAction="#addVersionInSearch" prefHeight="25.0" styleClass="custom-button" text="Добавить версию">
+                                                               <graphic>
+                                                                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                                     <image>
+                                                                        <Image url="@../../../../resources/images/add_doc_version_in_search.png" />
+                                                                     </image>
+                                                                  </ImageView>
+                                                               </graphic>
+                                                               <tooltip>
+                                                                  <Tooltip text="Добавляет версию в Search с выбранными параметрами." />
+                                                               </tooltip>
+                                                            </Button>
+                                                                            </children>
+                                                         <padding>
+                                                            <Insets right="6.0" />
+                                                         </padding>
+                                                                        </VBox>
+                                                                    </children>
+                                                                </AnchorPane>
+                                                            </content>
+                                                        </Tab>
+                                                    </tabs>
+                                                </TabPane>
+                                            </children>
+                                 <padding>
+                                    <Insets left="3.0" right="3.0" />
+                                 </padding>
+                                        </VBox>
+                                    </children>
+                                </AnchorPane>
+                                <BorderPane prefHeight="200.0" prefWidth="200.0" styleClass="backgroundPdfView">
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                    </padding>
+                                    <top>
+                                        <HBox prefHeight="32.0" prefWidth="532.0" spacing="5.0" BorderPane.alignment="CENTER">
+                                            <children>
+                                                <Label prefHeight="28.0" prefWidth="44.0" text="Зумм:">
+                                                    <font>
+                                                        <Font size="14.0" />
+                                                    </font>
+                                                </Label>
+                                                <Button mnemonicParsing="false" onAction="#zoomOut" prefHeight="25.0" prefWidth="35.0" styleClass="custom-button">
+                                       <graphic>
+                                          <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../../resources/images/zoom-out_basic_green.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                                <Label fx:id="labelCurrentZoom" prefHeight="25.0" styleClass="labelBold" />
+                                                <Button mnemonicParsing="false" onAction="#zoomIn" prefHeight="25.0" prefWidth="40.0" styleClass="custom-button">
+                                       <graphic>
+                                          <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../../resources/images/zoom-in_basic_green.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                                <Button mnemonicParsing="false" onAction="#zoomFit" styleClass="custom-button" text="Макс. по высоте " />
+                                                <Button mnemonicParsing="false" onAction="#zoomWidth" styleClass="custom-button" text="Макс. по ширине" />
+                                                <Button mnemonicParsing="false" onAction="#zoomTurnOnLeft" styleClass="custom-button" text="Повернуть влево">
+                                       <graphic>
+                                          <ImageView fitHeight="16.0" fitWidth="16.0" nodeOrientation="RIGHT_TO_LEFT" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../../../resources/images/arrow_turn_right.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                                <Button mnemonicParsing="false" onAction="#zoomTurnOnRight" styleClass="custom-button">
+                                       <graphic>
+                                          <HBox>
+                                             <children>
+                                                <Label id="labelLeftImages" styleClass="background" text="Повернуть вправо">
+                                                   <padding>
+                                                      <Insets right="5.0" />
+                                                   </padding>
+                                                </Label>
+                                                <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../../../resources/images/arrow_turn_right.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </children>
+                                          </HBox>
+                                       </graphic>
+                                    </Button>
+                                            </children>
+                                        </HBox>
+                                    </top>
+                                    <fx:define>
+                                        <ScrollPane fx:id="scroller" pannable="true" />
+                                    </fx:define>
+                                    <center>
+                                        <Pagination fx:id="pagination" styleClass="circle-pagination" BorderPane.alignment="CENTER">
+                                            <opaqueInsets>
+                                                <Insets />
+                                            </opaqueInsets>
+                                            <contextMenu>
+                                                <ContextMenu fx:id="contextMenuPaginationPdfView">
+                                                    <items>
+                                                        <MenuItem mnemonicParsing="false" onAction="#zoomIn" text="Зумм +" />
+                                                        <MenuItem mnemonicParsing="false" onAction="#zoomOut" text="Зумм -" />
+                                                        <MenuItem mnemonicParsing="false" onAction="#zoomTurnOnRight" text="Повернуть вправо" />
+                                                        <MenuItem mnemonicParsing="false" onAction="#zoomTurnOnLeft" text="Повернуть влево" />
+                                                        <MenuItem mnemonicParsing="false" onAction="#zoomFit" text="Макс. по высоте" />
+                                                        <MenuItem mnemonicParsing="false" onAction="#zoomWidth" text="Макс. по ширине" />
+                                                    </items>
+                                                </ContextMenu>
+                                            </contextMenu>
+                                        </Pagination>
+                                    </center>
+                                </BorderPane>
+                            </items>
+                            <opaqueInsets>
+                                <Insets />
+                            </opaqueInsets>
+                        </SplitPane>
+                    </children>
+                </AnchorPane>
+            </content>
+        </Tab>
+        <Tab closable="false" styleClass="specialTab" text="   Сканирование ТД   ">
+            <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+            </content>
+        </Tab>
+    </tabs>
+</TabPane>
