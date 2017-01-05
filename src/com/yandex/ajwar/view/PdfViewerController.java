@@ -69,7 +69,7 @@ public class PdfViewerController implements Initializable {
     private ObjectProperty<ImageView> currentImage;
     private DoubleProperty zoom;
     private PageDimensions currentPageDimensions;
-    private static volatile ExecutorService executorServiceLoad;
+    private static ExecutorService executorServiceLoad;
     private Path deleteMusorPath = null;
     private int pagesOfSheets = 0;
     private static final double ZOOM_DELTA = 1.1d;
@@ -77,7 +77,7 @@ public class PdfViewerController implements Initializable {
     private static final String defaultTextComboBoxMask = "Произвольно";
     private static final String strZakazDop = "**-**** Дополнение №*";
     //private final String FULL_PATH_FILE ="\\AppData\\Local\\Temp\\_IMS\\";
-    private final byte SECTION_ID = 1; //Раздел документация(столбец SECTION_ID) в таблице SSECTION
+    private static final byte SECTION_ID = 1; //Раздел документация(столбец SECTION_ID) в таблице SSECTION
 
     @FXML
     private Pagination pagination;
@@ -174,12 +174,17 @@ public class PdfViewerController implements Initializable {
      */
     private String returnDesignation(TextField field) {
         String str;
+        ///System.out.println(preferencesTableViewDocTypes.get(comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(), ""));
+        S4App.openQuery(S4App,"select suffix,dt_code from doctypes where doc_name=\""+comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem()+"\"");
+        int suffix=Integer.parseInt(S4App.queryFieldByName(S4App,"suffix"));
+        String code=S4App.queryFieldByName(S4App,"dt_code");
+        S4App.closeQuery(S4App);
         if (!textFieldDopNumberPdfView.getText().isEmpty()) str=" Дополнение №"+textFieldDopNumberPdfView.getText();
-        else str="";
-        if (preferencesTableViewDocTypes.get(comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(), "").isEmpty())
-            return field.getText()+str;
-        else
-            return field.getText()+str +" "+ preferencesTableViewDocTypes.get(comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(), "");
+            else str="";
+        if (suffix==0)
+                return field.getText()+str;
+            else
+                return field.getText()+str +" "+ code;
 
     }
 
@@ -233,6 +238,7 @@ public class PdfViewerController implements Initializable {
             disableMainWindow(true);
             //Проверяю код документа и формирую полное обозначение
             String designation = returnDesignation(textFieldDesignation);
+            System.out.println(designation);
             //Полный путь к файлу
             String path = copyAndReturnFullPath(designation, versionId);
             //нахожу Айди типа документа из базы Серча
@@ -346,13 +352,13 @@ public class PdfViewerController implements Initializable {
     @FXML
     private void checkVersionListDoc() {
         String design=returnDesignation(textFieldDesignation);
-            final String sql = "select doc_id from doclist where designatio=\"" +design+ "\"";
-            S4App.openQuery(S4App,sql);
-            if (!S4App.queryFieldByName(S4App,"doc_id").isEmpty())
-                S4App.showVersionsList(S4App,Long.parseLong(S4App.queryFieldByName(S4App,"doc_id")));
-            else
-                AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
-            S4App.closeQuery(S4App);
+        int id = S4App.getDocID_ByDesignation(S4App,design);
+        if (id>0){
+            S4App.openDocument(S4App,id);
+            S4App.showVersionList(S4App);
+            S4App.closeDocument(S4App);
+        }else
+            AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
     }
 
     /**
@@ -361,13 +367,11 @@ public class PdfViewerController implements Initializable {
     @FXML
     private void checkDesignation() {
         String design=returnDesignation(textFieldDesignation);
-            final String sql = "select doc_id from doclist where designatio=\"" + design + "\"";
-            S4App.openQuery(S4App,sql);
-            if (!S4App.queryFieldByName(S4App,"doc_id").isEmpty())
-                AlertUtilNew.message("Внимание!", "Такой документ уже есть в архиве.ID документа = " + S4App.queryFieldByName(S4App,"doc_id"), "Сообщение для ознакомления!", Alert.AlertType.WARNING);
-            else
-                AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
-            S4App.closeQuery(S4App);
+        int baseDocId = S4App.getDocID_ByDesignation(S4App,design);
+        if (baseDocId>0)
+            AlertUtilNew.message("Внимание!", "Такой документ уже есть в архиве.ID документа = " +baseDocId /*S4App.queryFieldByName(S4App,"doc_id")*/, "Сообщение для ознакомления!", Alert.AlertType.WARNING);
+        else
+            AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
     }
 
     /**

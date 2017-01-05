@@ -95,20 +95,20 @@ public class S4AppUtil extends ActiveXComponent{
     }
     public void closeQuery(ActiveXComponent S4App){
         Dispatch.call(S4App,"CloseQuery");
-        //ComThread.Release();
-        //ComThread.quitMainSTA();
     }
     public int queryGoNext(ActiveXComponent S4App){
         return Dispatch.call(S4App,"QueryGoNext").getInt();
     }
-    public void queryGoFirst(ActiveXComponent S4App){Dispatch.call(S4App,"QueryGoFirst");}
-    public int queryEOF(ActiveXComponent S4App){return Dispatch.call(S4App,"QueryEOF").getInt();}
+    public void queryGoFirst(ActiveXComponent S4App){
+        Dispatch.call(S4App,"QueryGoFirst");
+    }
+    public int queryEOF(ActiveXComponent S4App){
+        return Dispatch.call(S4App,"QueryEOF").getInt();
+    }
     public int queryRecordCount(ActiveXComponent S4App){return Dispatch.call(S4App,"QueryRecordCount").getInt();}
-
     public String queryFieldByName(ActiveXComponent S4App,String fieldName){
         return Dispatch.call(S4App,"QueryFieldByName",fieldName).getString();
     }
-
     public void openDocument(ActiveXComponent S4App,long id){
         Dispatch.call(S4App,"OpenDocument",id);
     }
@@ -133,8 +133,14 @@ public class S4AppUtil extends ActiveXComponent{
     public void saveWorkCopy(ActiveXComponent S4App,long id){
         Dispatch.call(S4App,"SaveWorkCopy",id);
     }
-    public int chooseArchiveName(S4AppUtil S4App){
+    public int chooseArchiveName(ActiveXComponent S4App){
        return Dispatch.call(S4App,"ChooseArchiveName").getInt();
+    }
+    public void showVersionList(ActiveXComponent S4App){
+        Dispatch.call(S4App,"ShowVersionList");
+    }
+    public int showVersionList2(ActiveXComponent S4App){
+        return Dispatch.call(S4App,"ShowVersionList2").getInt();
     }
     public void showVersionsList(ActiveXComponent S4App,long id){
         Dispatch.call(S4App,"ShowVersionsList",id);
