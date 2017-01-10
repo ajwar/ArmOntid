@@ -83,6 +83,30 @@ public class OptionsController implements Initializable{
     private TextField textFieldArchiveId;
     @FXML
     private ComboBox<String> comboBoxMask;
+    @FXML
+    private CheckBox checkBoxScanKdOptions;
+    @FXML
+    private CheckBox checkBoxScanTdOptions;
+    @FXML
+    private CheckBox checkBoxScanKdNewOptions;
+    @FXML
+    private CheckBox checkBoxScanKdVersionOptions;
+
+    private void addListenerCheckBox(){
+        checkBoxScanKdOptions.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            /*if (newValue){
+                checkBoxScanKdNewOptions.setDisable(false);
+                checkBoxScanKdVersionOptions.setDisable(false);
+                checkBoxScanKdNewOptions.selectedProperty().set(newValue);
+                checkBoxScanKdVersionOptions.selectedProperty().set(newValue);
+            }else {*/
+                checkBoxScanKdNewOptions.setDisable(!newValue);
+                checkBoxScanKdVersionOptions.setDisable(!newValue);
+                checkBoxScanKdNewOptions.selectedProperty().set(newValue);
+                checkBoxScanKdVersionOptions.selectedProperty().set(newValue);
+            //}
+        });
+    }
 
     /**Обновление формы PdfView при нажатии на кнопку сохранить*/
     public void updatePdfViewAfterClickSave(){
@@ -123,11 +147,17 @@ public class OptionsController implements Initializable{
     }
     /**Сохранение в реестр при нажатии на кнопку "Сохранить"*/
     public void onClickMouseButtonSave(){
-        if (textFieldArchiveId.getText().isEmpty()) AlertUtilNew.message("Внимание!","Выберите архив из списка архивов Search!","Пустое поле архивы.", Alert.AlertType.WARNING);
-        else {
+        if (textFieldArchiveId.getText().isEmpty()) {
+            AlertUtilNew.message("Внимание!","Выберите архив из списка архивов Search!","Пустое поле архивы.", Alert.AlertType.WARNING);
+        }else {
             preferencesScanKdAndTd.putLong("textFieldArchiveId", Long.parseLong(textFieldArchiveId.getText()));
             preferencesScanKdAndTd.put("textFieldFolderScan", textFieldFolderScan.getText());
             preferencesScanKdAndTd.put("textFieldFolderMove", textFieldFolderMove.getText());
+            preferencesScanKdAndTd.putBoolean("checkBoxScanKdOptions",checkBoxScanKdOptions.selectedProperty().get());
+            preferencesScanKdAndTd.putBoolean("checkBoxScanKdNewOptions",checkBoxScanKdNewOptions.selectedProperty().get());
+            preferencesScanKdAndTd.putBoolean("checkBoxScanKdVersionOptions",checkBoxScanKdVersionOptions.selectedProperty().get());
+            preferencesScanKdAndTd.putBoolean("checkBoxScanTdOptions",checkBoxScanTdOptions.selectedProperty().get());
+            checkBoxScanTdOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true));
             try {
                 preferencesTableViewDocTypes.clear();
                 preferencesTableViewInputMask.clear();
@@ -174,8 +204,8 @@ public class OptionsController implements Initializable{
         //открываю новый поток Jacob и создаю новый объект Серча
         S4AppUtil S4AppThread=S4AppUtil.returnAndCreateThreadS4App();
         try {
-            //Работаю уже с новым объектом серча в новом потоке
-            S4AppThread.openQuery(S4AppThread,"Select doc_name from doctypes order by doc_name");
+            //Работаю уже с новым объектом серча в новом потоке и ищу только типы документов с расширением PDF
+            S4AppThread.openQuery(S4AppThread,"Select doc_name from doctypes where doc_ext=\"pdf\" order by doc_name");
             for (S4AppThread.queryGoFirst(S4AppThread); S4AppThread.queryEOF(S4AppThread)==0 ; S4AppThread.queryGoNext(S4AppThread)) {
                 comboBoxScanKDTypeDoc.getItems().add(S4AppThread.queryFieldByName(S4AppThread,"doc_name"));
             }
@@ -293,6 +323,10 @@ public class OptionsController implements Initializable{
         getTextFieldArchiveId().setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldArchiveId",323)));
         getTextFieldFolderMove().setText(preferencesScanKdAndTd.get("textFieldFolderMove",System.getProperty("user.home")));
         getTextFieldFolderScan().setText(preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home")));
+        checkBoxScanKdOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanKdOptions",true));
+        checkBoxScanKdNewOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanKdNewOptions",true));
+        checkBoxScanKdVersionOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanKdVersionOptions",true));
+        checkBoxScanTdOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true));
         try {
             String keysDocTypes[]= preferencesTableViewDocTypes.keys();
             String keysInputMask[]=preferencesTableViewInputMask.keys();
@@ -371,6 +405,7 @@ public class OptionsController implements Initializable{
         createAndConfigureExecutorsLoadService();
         initTableColumns();
         executorServiceLoad.submit(this::containComboBoxScanKDTypeDoc);
+        addListenerCheckBox();
         loadBaseOptions();
     }
 }

@@ -32,9 +32,9 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.ScrollPane?>
-<TabPane prefHeight="800.0" prefWidth="1200.0" styleClass="backgroundPdfView" stylesheets="@stylePdfViewer.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yandex.ajwar.view.PdfViewerController">
+<TabPane fx:id="tabPaneScanKdPdfView" prefHeight="800.0" prefWidth="1200.0" styleClass="backgroundPdfView" stylesheets="@stylePdfViewer.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yandex.ajwar.view.PdfViewerController">
     <tabs>
-        <Tab closable="false" styleClass="specialTab" text="    Сканирование КД    ">
+        <Tab fx:id="tabScanKdPdfView" closable="false" styleClass="specialTab" text="    Сканирование КД    ">
             <content>
                 <AnchorPane prefHeight="500.0" prefWidth="800.0" styleClass="backgroundPdfView">
                     <children>
@@ -121,9 +121,9 @@
                                              </tooltip></Button>
                                                     </children>
                                                 </HBox>
-                                                <TabPane prefHeight="376.0" prefWidth="300.0" styleClass="backgroundPdfView" tabClosingPolicy="UNAVAILABLE">
+                                                <TabPane fx:id="tabPaneScanKdNewAndVersionPdfView" prefHeight="376.0" prefWidth="300.0" styleClass="backgroundPdfView" tabClosingPolicy="UNAVAILABLE">
                                                     <tabs>
-                                                        <Tab styleClass="specialTab" text="   Новый    ">
+                                                        <Tab fx:id="tabScanKdNewPdfView" styleClass="specialTab" text="   Новый    ">
                                                             <content>
                                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                                                     <children>
@@ -192,7 +192,7 @@
                                                                 </AnchorPane>
                                                             </content>
                                                         </Tab>
-                                                        <Tab styleClass="specialTab" text="   Версия   ">
+                                                        <Tab fx:id="tabScanKdVersionPdfView" styleClass="specialTab" text="   Версия   ">
                                                             <content>
                                                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="354.0" prefWidth="300.0">
                                                                     <children>
@@ -400,7 +400,7 @@
                 </AnchorPane>
             </content>
         </Tab>
-        <Tab closable="false" styleClass="specialTab" text="   Сканирование ТД   ">
+        <Tab fx:id="tabScanTdPdfView" closable="false" styleClass="specialTab" text="   Сканирование ТД   ">
             <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
             </content>

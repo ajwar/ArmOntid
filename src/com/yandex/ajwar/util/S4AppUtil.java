@@ -38,15 +38,14 @@ public class S4AppUtil extends ActiveXComponent{
     }
 
     //Переменные
-    public int getQuietMode(S4AppUtil s4AppUtil){
-        return s4AppUtil.getPropertyAsInt("QuietMode");
+    public int getQuietMode(ActiveXComponent S4App){
+        return S4App.getPropertyAsInt("QuietMode");
     }
-    public int getErrorCode(S4AppUtil s4AppUtil) {
-        return s4AppUtil.getPropertyAsInt("ErrorCode");
+    public int getErrorCode(ActiveXComponent S4App) {
+        return S4App.getPropertyAsInt("ErrorCode");
     }
-
-    public String getErrorMessage(S4AppUtil s4AppUtil) {
-        return s4AppUtil.getPropertyAsString("ErrorMessage");
+    public String getErrorMessage(ActiveXComponent S4App) {
+        return S4App.getPropertyAsString("ErrorMessage");
     }
 
     //дополнительные функции и процедуры

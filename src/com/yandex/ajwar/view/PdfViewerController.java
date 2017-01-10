@@ -151,6 +151,21 @@ public class PdfViewerController implements Initializable {
     private ContextMenu contextMenuPaginationPdfView;
     @FXML
     private ImageView imageViewPdfView;
+    @FXML
+    private TabPane tabPaneScanKdPdfView;
+    @FXML
+    private TabPane tabPaneScanKdNewAndVersionPdfView;
+    @FXML
+    private Tab tabScanKdPdfView;
+    @FXML
+    private Tab tabScanTdPdfView;
+    @FXML
+    private Tab tabScanKdNewPdfView;
+    @FXML
+    private Tab tabScanKdVersionPdfView;
+    @FXML
+    private CheckBox test2;
+
 
 
     /**Проверка заполнения обозначения*/
@@ -185,7 +200,6 @@ public class PdfViewerController implements Initializable {
                 return field.getText()+str;
             else
                 return field.getText()+str +" "+ code;
-
     }
 
     /**
@@ -216,6 +230,18 @@ public class PdfViewerController implements Initializable {
     private void disableButton(boolean flag) {
         buttonExportInSearch.setDisable(flag);
         buttonAddVersionInSearch.setDisable(flag);
+    }
+    /**Невидимость форм окна при изменении в опциях ЧекБоксов*/
+    public void disableFormPdfView(){
+        tabScanKdPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanKdOptions",true));
+        tabScanKdNewPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanKdNewOptions",true));
+        tabScanKdVersionPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanKdVersionOptions",true));
+        tabScanTdPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true));
+        //tabScanTdPdfView.getGraphic().visibleProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true));
+        //tabPaneScanKdPdfView.getTabs().get(1).closableProperty().set(false);
+        //tabScanKdPdfView.setClosable(true);
+        //tabPaneScanKdNewAndVersionPdfView.setVisible(false);
+        //tabScanTdPdfView.getGraphic().visibleProperty().bind(test2.selectedProperty());
     }
 
     /**
@@ -347,7 +373,7 @@ public class PdfViewerController implements Initializable {
     }
 
     /**
-     * Проверка есть ли документ с таким обозначением в архивах Search при нажатии на кнопку "Проверить"
+     * Выводит список версий при нажатии на кнопку "Список версий"
      */
     @FXML
     private void checkVersionListDoc() {
@@ -454,22 +480,24 @@ public class PdfViewerController implements Initializable {
         }
     }
 
-    /**При клилке на кнопку Вывод наим.производится считывание из базы Серча наименования предыдущего заказа(выбрана маска "**-**** Дополнение №*")*/
+    /**При клике на кнопку Вывод наим.производится считывание из базы Серча наименования предыдущего заказа(выбрана маска "**-**** Дополнение №*")*/
     @FXML
     private void checkNameOfDesignation(){
-            if (!textFieldDesignation.getText().isEmpty() && !textFieldDopNumberPdfView.getText().isEmpty()){
-                    int num=Integer.parseInt(textFieldDopNumberPdfView.getText().trim());
-                    String docTypeId = preferencesTableViewDocTypes.get(comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(), "Ошибка");
-                    String design;
-                    if (num>1) {
-                        design=textFieldDesignation.getText()+" Дополнение №"+(num-1)+" "+docTypeId;
-                    }else design=textFieldDesignation.getText()+" "+docTypeId;
-                            StageHelper.getStages().get(0).getScene().getRoot().setDisable(true);
-                            S4App.openQuery(S4App,"select name from doclist where designatio=\""+design+"\"");
-                            textAreaName.setText(S4App.queryFieldByName(S4App,"name"));
-                            S4App.closeQuery(S4App);
-                            StageHelper.getStages().get(0).getScene().getRoot().setDisable(false);
-                    }
+        if (!textFieldDesignation.getText().isEmpty() && !textFieldDopNumberPdfView.getText().isEmpty()){
+            int num=Integer.parseInt(textFieldDopNumberPdfView.getText().trim());
+            String designOld=returnDesignation(textFieldDesignation);
+            String design;
+            if (num>1){
+                design= designOld.replace("№"+num,"№"+(num-1));
+            }else {
+                design= designOld.replace(" Дополнение №"+num,"");
+            }
+            S4App.openQuery(S4App,"select name from doclist where designatio=\""+design+"\"");
+            String name=S4App.queryFieldByName(S4App,"name");
+            S4App.closeQuery(S4App);
+            if (!name.isEmpty()) textAreaName.setText(name);
+            else AlertUtilNew.message("Поиск наименования документа в Search.","Такого наименования нет в Search или оно пустое","Закончился поиск.", Alert.AlertType.WARNING);
+        }
     }
     /**
      * Вешаю слушателя на TextFieldDesignation для проверки и очистки буффера обмена
@@ -529,6 +557,7 @@ public class PdfViewerController implements Initializable {
                 textFieldDopNumberPdfView.setMinWidth(50);
                 textFieldDesignation.setMinWidth(197-50-40);
                 buttonListVersion.setDisable(true);
+                buttonCheckDesignation.setDisable(true);
             }else {
                 textFieldDesignation.clear();
                 textFieldDopNumberPdfView.clear();
@@ -547,15 +576,15 @@ public class PdfViewerController implements Initializable {
     private void addListenerCheckBoxArbitrarily() {
         checkBoxArbitrarily.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                comboBoxFormatPdfViewController.setEditable(true);
+                comboBoxFormatPdfViewController.setEditable(newValue);
             } else {
-                comboBoxFormatPdfViewController.setEditable(false);
+                comboBoxFormatPdfViewController.setEditable(newValue);
                 comboBoxFormatPdfViewController.getSelectionModel().select(0);
             }
         });
     }
 
-    /**Заполнение любого комбоБокса*/
+    /**Заполнение любого комбоБокса из данных реестра*/
     public void containComboBox(ComboBox comboBox){
         final String idComboBox=comboBox.getId();
         comboBox.getItems().removeAll(comboBox.getItems());
@@ -628,15 +657,11 @@ public class PdfViewerController implements Initializable {
         /**Задаю начальную дату в DataPicker(сегодня)*/
         initValueDataPicker();
         //Инициализирую подсказку
-        //tooltipDesignationPdfView.setText("Допускается ввод любого обозначения.");
         /**Скрываю лабели доп текста и текстфилд*/
-        //labelDopNumberPdfView.setText("");
-        //textFieldDopNumberPdfView.setVisible(false);
-        //labelDopNumberPdfView.setVisible(false);
         textFieldDopNumberPdfView.setTextFormatter(TextFormatterUtil.gTextFormatter("***",textFieldDopNumberPdfView));
 
         createAndConfigureExecutorsLoadService();
-        createAndConfigureFileChooser();
+        //createAndConfigureFileChooser();
         //Запускаю в других потоках начальную загрузку из реестра
         //executorServiceLoad.submit(this::containComboBoxMask);
         //executorServiceLoad.submit(this::containComboBoxDocTypes);
@@ -658,6 +683,8 @@ public class PdfViewerController implements Initializable {
         // when required.
         zoom.addListener((observable, oldValue, newValue) -> updateImage(pagination.getCurrentPageIndex(), DEGREE));
         labelCurrentZoom.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
+        //невидимость Табов на форме
+        /**disableFormPdfView();*/
 
         /**Чтение из БД Серча причин изменения из таблицы rreasons*/
         Platform.runLater(() -> containComboBoxChangeReason());
@@ -671,6 +698,8 @@ public class PdfViewerController implements Initializable {
         //Platform.runLater(() -> checkNameOfDesignation());
         bindPaginationToCurrentFile();
         createPaginationPageFactory();
+        //test2.selectedProperty().set(true);
+        disableFormPdfView();
     }
 
     private void createAndConfigureExecutorsLoadService() {
@@ -681,12 +710,6 @@ public class PdfViewerController implements Initializable {
             thread.setDaemon(true);
             return thread;
         });
-    }
-
-    private void createAndConfigureFileChooser() {
-        fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
-        fileChooser.getExtensionFilters().add(new ExtensionFilter("PDF Files", "*.pdf", "*.PDF"));
     }
 
     private void bindPaginationToCurrentFile() {
@@ -725,37 +748,6 @@ public class PdfViewerController implements Initializable {
     }
 
     // ************** Event Handlers ****************
-
-    @FXML
-    private void loadFile() {
-        final File file = fileChooser.showOpenDialog(pagination.getScene().getWindow());
-        if (file != null) {
-            final Task<PDFFile> loadFileTask = new Task<PDFFile>() {
-                @Override
-                protected PDFFile call() throws Exception {
-                    try (
-                            RandomAccessFile raf = new RandomAccessFile(file, "r");
-                            FileChannel channel = raf.getChannel()
-                    ) {
-                        ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-                        return new PDFFile(buffer);
-                    }
-                }
-            };
-            loadFileTask.setOnSucceeded(event -> {
-                pagination.getScene().getRoot().setDisable(false);
-                final PDFFile pdfFile = loadFileTask.getValue();
-                currentFile.set(pdfFile);
-            });
-            loadFileTask.setOnFailed(event -> {
-                pagination.getScene().getRoot().setDisable(false);
-                AlertUtilNew.showErrorMessage("Could not load file " + file.getName(), loadFileTask.getException(), pagination);
-            });
-            pagination.getScene().getRoot().setDisable(true);
-            executorServiceLoad.submit(loadFileTask);
-
-        }
-    }
 
     @FXML
     private void zoomIn() {

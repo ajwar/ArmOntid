@@ -14,6 +14,7 @@ public class Test {
         S4AppUtil s4AppUtil=S4AppUtil.getInstance();
         s4AppUtil.login(s4AppUtil);
         int x;
+        long b=System.currentTimeMillis();
         s4AppUtil.openQuery(s4AppUtil,"select designatio from doclist where doc_type=\"1000017\" and designatio like '%СП%'" );
         for (s4AppUtil.queryGoFirst(s4AppUtil); s4AppUtil.queryEOF(s4AppUtil) == 0; s4AppUtil.queryGoNext(s4AppUtil)) {
             String str=s4AppUtil.queryFieldByName(s4AppUtil,"designatio");
@@ -34,6 +35,7 @@ public class Test {
         }
         System.out.println(sum+"    Количество совпадений разных СП");
         System.out.println(x-sum+"    разница");
+        System.out.println((System.currentTimeMillis()-b)+" Столько времени заняла проверка");
         s4AppUtil.closeQuery(s4AppUtil);
     }
 }

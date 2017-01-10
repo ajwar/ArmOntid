@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -83,6 +84,7 @@ public class MainApp extends Application {
             mainBorderPane.setCenter(pdfViewer);
             setPdfViewerController(loader.getController());
             getPdfViewerController().setMainApp(this);
+            //getPdfViewerController().disableFormPdfView();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -93,12 +95,13 @@ public class MainApp extends Application {
         try {
             FXMLLoader loader=new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/Options.fxml"));
-            TabPane pageOptions=(TabPane)loader.load();
+            //TabPane pageOptions=(TabPane)loader.load();
+            AnchorPane paneOptions=(AnchorPane)loader.load();
             Stage stageOptions=new Stage();
             stageOptions.setTitle("Настройки");
             stageOptions.initModality(Modality.WINDOW_MODAL);
             stageOptions.initOwner(primaryStage);
-            Scene scene=new Scene(pageOptions);
+            Scene scene=new Scene(paneOptions);
             stageOptions.setScene(scene);
             //stageOptions.initStyle(StageStyle.UNDECORATED);
             setOptionsController(loader.getController());
