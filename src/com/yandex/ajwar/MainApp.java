@@ -1,6 +1,7 @@
 package com.yandex.ajwar;
 
 
+import com.sun.deploy.util.SystemUtils;
 import com.yandex.ajwar.model.StringData;
 import com.yandex.ajwar.util.S4AppUtil;
 import com.yandex.ajwar.view.MainWindowController;
@@ -21,6 +22,7 @@ import javafx.stage.Stage;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.prefs.Preferences;
 
 public class MainApp extends Application {
@@ -37,12 +39,12 @@ public class MainApp extends Application {
     private OptionsController optionsController;
     private MainWindowController mainWindowController;
     private ObservableList<StringData> stringNameFileData = FXCollections.observableArrayList();
-    //private static final ExecutorService executorServiceLoad=PdfViewerController.getExecutorServiceLoad();
 
     @Override
     public void start(Stage primaryStage) throws Exception{
         this.primaryStage=primaryStage;
         this.primaryStage.setTitle("Сканирование КД и ТД");
+        log.info("Юзер "+System.getProperty("user.name")+" запустил программу ScanKdAndTd.");
         initMainWindow();
         showRightWindow();
         primaryStage.show();
@@ -50,6 +52,11 @@ public class MainApp extends Application {
 
 
     public static void main(String[] args) {
+        double version=Double.parseDouble(System.getProperty("java.specification.version"));
+        if (version<1.8){
+            log.error("Версия Java, установленная на этой машине(" + version + "), меньше версии необходимой для запуска программы (1.8).");
+            System.exit(0);
+        }
         launch(args);
     }
 
@@ -66,10 +73,10 @@ public class MainApp extends Application {
             //минимальные размеры основной формы
             getPrimaryStage().setMinHeight(830);
             getPrimaryStage().setMinWidth(1050);
-            //getPrimaryStage().initStyle(StageStyle.UNDECORATED);
             setMainWindowController(loader.getController());
             getMainWindowController().setMainApp(this);
         } catch (IOException e) {
+            log.error("Ошибка при загрузке главной формы(MainWindow.fxml).",e);
             e.printStackTrace();
         }
     }
@@ -80,12 +87,11 @@ public class MainApp extends Application {
             FXMLLoader loader=new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/PdfViewer.fxml"));
             TabPane pdfViewer=(TabPane)loader.load();
-            //ScrollPane pdfViewer=(ScrollPane)loader.load();
             mainBorderPane.setCenter(pdfViewer);
             setPdfViewerController(loader.getController());
             getPdfViewerController().setMainApp(this);
-            //getPdfViewerController().disableFormPdfView();
         } catch (IOException e) {
+            log.error("Ошибка при загрузке правой формы (PdfViewer.fxml).",e);
             e.printStackTrace();
         }
     }
@@ -95,7 +101,6 @@ public class MainApp extends Application {
         try {
             FXMLLoader loader=new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/Options.fxml"));
-            //TabPane pageOptions=(TabPane)loader.load();
             AnchorPane paneOptions=(AnchorPane)loader.load();
             Stage stageOptions=new Stage();
             stageOptions.setTitle("Настройки");
@@ -103,15 +108,14 @@ public class MainApp extends Application {
             stageOptions.initOwner(primaryStage);
             Scene scene=new Scene(paneOptions);
             stageOptions.setScene(scene);
-            //stageOptions.initStyle(StageStyle.UNDECORATED);
             setOptionsController(loader.getController());
             getOptionsController().setMainApp(this);
             getOptionsController().setOptionsDialogStage(stageOptions);
             stageOptions.sizeToScene();
             stageOptions.setResizable(false);
             stageOptions.hide();
-            //stageOptions.showAndWait();
         } catch (IOException e) {
+            log.error("Ошибка при загрузке формы настроек (Options.fxml).",e);
             e.printStackTrace();
         }
     }

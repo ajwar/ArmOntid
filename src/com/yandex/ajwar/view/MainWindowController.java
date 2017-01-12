@@ -1,6 +1,5 @@
 package com.yandex.ajwar.view;
 
-import com.jacob.com.ComThread;
 import com.yandex.ajwar.MainApp;
 import com.yandex.ajwar.util.AlertUtilNew;
 import com.yandex.ajwar.util.S4AppUtil;
@@ -9,18 +8,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
+import org.apache.log4j.Logger;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MainWindowController implements Initializable {
     private MainApp mainApp;
+    private static final Logger log=Logger.getLogger(MainApp.class);
     private S4AppUtil S4App = S4AppUtil.getInstance();
     private static final String LOGIN = "ajwar";
     private static final String PASSWORD = "ra0843766";
     private static volatile boolean FL=false;
-    @FXML
-    private ScrollPane scrollerMainWindow;
+    /*@FXML
+    private ScrollPane scrollerMainWindow;*/
 
 
     /**
@@ -28,6 +29,7 @@ public class MainWindowController implements Initializable {
      */
     @FXML
     private void handleExit() {
+        log.info("Юзер " + System.getProperty("user.name") + " завершил работу ScanKdAndTd.");
         System.exit(0);
         //ComThread.quitMainSTA();
     }
@@ -48,9 +50,10 @@ public class MainWindowController implements Initializable {
         AlertUtilNew.messageLogAndPass(LOGIN, PASSWORD);
         if (FL) {
             getMainApp().getOptionsController().getOptionsDialogStage().showAndWait();
-        } else
+        } else{
             AlertUtilNew.message("Произошла ошибка.", "Введен неправильгый логин или пароль.Проверьте раскладку клавиатуры и Caps Lock.",
                     "Ошибка при заполнении данных.", Alert.AlertType.ERROR);
+        }
         FL=false;
     }
 
@@ -59,7 +62,8 @@ public class MainWindowController implements Initializable {
         if (S4App.login(S4App) == 0) {
             if (S4App.isLoggedIn(S4App)==0)
                 Platform.runLater(()->{
-                    AlertUtilNew.message("Внимание!", "Перед запуском программы зайдите в Search под своим логином и запустите повторно.", "Не выполнен вход в систему Search.", Alert.AlertType.WARNING);
+                log.info("Юзер " + System.getProperty("user.name") + " завершил работу ScanKdAndTd.");
+                AlertUtilNew.message("Внимание!", "Перед запуском программы зайдите в Search под своим логином и запустите повторно.", "Не выполнен вход в систему Search.", Alert.AlertType.WARNING);
                     System.exit(0);
                 });
         }

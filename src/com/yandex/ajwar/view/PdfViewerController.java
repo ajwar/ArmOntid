@@ -31,9 +31,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.apache.log4j.Logger;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -59,6 +59,7 @@ public class PdfViewerController implements Initializable {
 
     private MainApp mainApp;
     private S4AppUtil S4App = S4AppUtil.getInstance();
+    private static final Logger log=Logger.getLogger(MainApp.class);
     private Preferences preferencesScanKdAndTd = MainApp.getPreferencesScanKdAndTd();
     private Preferences preferencesTableViewDocTypes = MainApp.getPreferencesTableViewDocTypes();
     private Preferences preferencesTableViewInputMask = MainApp.getPreferencesTableViewInputMask();
@@ -93,8 +94,6 @@ public class PdfViewerController implements Initializable {
     private ScrollPane scroller;
     @FXML
     private Tooltip tooltipDesignationPdfView;
-/*    @FXML
-    private ScrollPane scrollerMainWindow;*/
     @FXML
     private TableView<StringData> listFileTable;
     @FXML
@@ -163,21 +162,7 @@ public class PdfViewerController implements Initializable {
     private Tab tabScanKdNewPdfView;
     @FXML
     private Tab tabScanKdVersionPdfView;
-    @FXML
-    private CheckBox test2;
 
-
-
-    /**Проверка заполнения обозначения*/
-    private boolean checkDesignationInSearchAndAddVersion(String str){
-        boolean flag;
-        if (strZakazDop.equals(str)){
-            flag=(textFieldDesignation.getText()+" Дополнение №"+textFieldDopNumberPdfView.getText()).length()>=str.length();
-        }else if (str.equals(defaultTextComboBoxMask)){
-            flag=!textFieldDesignation.getText().isEmpty();
-        }else flag=textFieldDesignation.getText().length()==str.length();
-        return flag;
-    }
     /**Дисэйбл главной формы*/
     private void disableMainWindow(boolean flag) {
         if (flag) executorServiceLoad.submit(()->getMainApp().getPrimaryStage().getScene().getRoot().setDisable(true));
@@ -189,7 +174,6 @@ public class PdfViewerController implements Initializable {
      */
     private String returnDesignation(TextField field) {
         String str;
-        ///System.out.println(preferencesTableViewDocTypes.get(comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(), ""));
         S4App.openQuery(S4App,"select suffix,dt_code from doctypes where doc_name=\""+comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem()+"\"");
         int suffix=Integer.parseInt(S4App.queryFieldByName(S4App,"suffix"));
         String code=S4App.queryFieldByName(S4App,"dt_code");
@@ -216,10 +200,14 @@ public class PdfViewerController implements Initializable {
      */
     private String copyAndReturnFullPath(String designation, int version) {
         String path;
-        if (version == 0) {
+        if (version == 0 && System.getProperty("os.name").indexOf("Win") != -1) {
             path = preferencesScanKdAndTd.get("textFieldFolderMove", System.getProperty("user.home")) + "\\" + designation + " Скан.pdf";
-        } else {
+        } else if( version !=0 && System.getProperty("os.name").indexOf("Win") != -1){
             path = preferencesScanKdAndTd.get("textFieldFolderMove", System.getProperty("user.home")) + "\\" + designation + " [" + version + "] Скан.pdf";
+        }else if (version==0 && System.getProperty("os.name").indexOf("Win") == -1){
+            path = preferencesScanKdAndTd.get("textFieldFolderMove", System.getProperty("user.home")) + "/" + designation + " Скан.pdf";
+        }else {
+            path = preferencesScanKdAndTd.get("textFieldFolderMove", System.getProperty("user.home")) + "/" + designation + " [" + version + "] Скан.pdf";
         }
         return path;
     }
@@ -233,15 +221,27 @@ public class PdfViewerController implements Initializable {
     }
     /**Невидимость форм окна при изменении в опциях ЧекБоксов*/
     public void disableFormPdfView(){
-        tabScanKdPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanKdOptions",true));
-        tabScanKdNewPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanKdNewOptions",true));
-        tabScanKdVersionPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanKdVersionOptions",true));
-        tabScanTdPdfView.setDisable(!preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true));
-        //tabScanTdPdfView.getGraphic().visibleProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true));
-        //tabPaneScanKdPdfView.getTabs().get(1).closableProperty().set(false);
-        //tabScanKdPdfView.setClosable(true);
-        //tabPaneScanKdNewAndVersionPdfView.setVisible(false);
-        //tabScanTdPdfView.getGraphic().visibleProperty().bind(test2.selectedProperty());
+        if (!preferencesScanKdAndTd.getBoolean("checkBoxScanKdOptions",true)){
+            tabPaneScanKdPdfView.getTabs().remove(tabScanKdPdfView);
+        }else if(!tabPaneScanKdPdfView.getTabs().contains(tabScanKdPdfView)){
+            tabPaneScanKdPdfView.getTabs().add(tabScanKdPdfView);
+        }
+        if (!preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true)){
+            tabPaneScanKdPdfView.getTabs().remove(tabScanTdPdfView);
+        }else if(!tabPaneScanKdPdfView.getTabs().contains(tabScanTdPdfView)){
+            tabPaneScanKdPdfView.getTabs().add(tabScanTdPdfView);
+        }
+        if (!preferencesScanKdAndTd.getBoolean("checkBoxScanKdNewOptions",true)){
+            tabPaneScanKdNewAndVersionPdfView.getTabs().remove(tabScanKdNewPdfView);
+        }else if(!tabPaneScanKdNewAndVersionPdfView.getTabs().contains(tabScanKdNewPdfView)){
+            tabPaneScanKdNewAndVersionPdfView.getTabs().addAll(tabScanKdNewPdfView);
+        }
+        if (!preferencesScanKdAndTd.getBoolean("checkBoxScanKdVersionOptions",true)){
+            tabPaneScanKdNewAndVersionPdfView.getTabs().remove(tabScanKdVersionPdfView);
+        }else if (!tabPaneScanKdNewAndVersionPdfView.getTabs().contains(tabScanKdVersionPdfView)){
+            tabPaneScanKdNewAndVersionPdfView.getTabs().add(tabScanKdVersionPdfView);
+        }
+
     }
 
     /**
@@ -264,7 +264,6 @@ public class PdfViewerController implements Initializable {
             disableMainWindow(true);
             //Проверяю код документа и формирую полное обозначение
             String designation = returnDesignation(textFieldDesignation);
-            System.out.println(designation);
             //Полный путь к файлу
             String path = copyAndReturnFullPath(designation, versionId);
             //нахожу Айди типа документа из базы Серча
@@ -273,8 +272,14 @@ public class PdfViewerController implements Initializable {
             S4App.closeQuery(S4App);
             //присваиваю номер архива в переменную
             long archive = preferencesScanKdAndTd.getLong("textFieldArchiveId", 323);
+            String fullFileName;
+            if (System.getProperty("os.name").indexOf("Win") != -1){
+                fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"\\"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
+            }else {
+                fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"/"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
+            }
             try {
-                Files.copy(Paths.get(listFileTable.getSelectionModel().getSelectedItem().getNameFile()), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(Paths.get(fullFileName), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -339,8 +344,14 @@ public class PdfViewerController implements Initializable {
                 int reasonCode = Integer.parseInt(S4App.queryFieldByName(S4App,"reasoncode"));//код причины изменения из БД Серча
                 S4App.closeQuery(S4App);
                 S4App.createDocVersion(S4App,baseDocId, S4App.getDocMaxVersionID(S4App,baseDocId), versionCode, versionNote, stringVersionFileName, reasonCode, 0);
+                String fullFileName;
+                if (System.getProperty("os.name").indexOf("Win") != -1){
+                    fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"\\"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
+                }else {
+                    fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"/"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
+                }
                 try {
-                    Files.copy(Paths.get(listFileTable.getSelectionModel().getSelectedItem().getNameFile()), Paths.get(stringVersionFileName), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(Paths.get(fullFileName), Paths.get(stringVersionFileName), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -388,19 +399,6 @@ public class PdfViewerController implements Initializable {
     }
 
     /**
-     * Проверка есть ли документ с таким обозначением в архивах Search при нажатии на кнопку "Проверить"
-     */
-    @FXML
-    private void checkDesignation() {
-        String design=returnDesignation(textFieldDesignation);
-        int baseDocId = S4App.getDocID_ByDesignation(S4App,design);
-        if (baseDocId>0)
-            AlertUtilNew.message("Внимание!", "Такой документ уже есть в архиве.ID документа = " +baseDocId /*S4App.queryFieldByName(S4App,"doc_id")*/, "Сообщение для ознакомления!", Alert.AlertType.WARNING);
-        else
-            AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
-    }
-
-    /**
      * Обновление таблицы с файлами при нажатии на кнопку "Обновить"
      */
     @FXML
@@ -414,8 +412,10 @@ public class PdfViewerController implements Initializable {
      */
     @FXML
     private void onMouseClickedTableListFile() {
+        pagination.getScene().getRoot().setDisable(true);
         disableButton(false);
         StringData row = listFileTable.getSelectionModel().getSelectedItem();
+        String fullNameFile;
         if (row == null) return;
         Path pathDestination;
         //Подчищаю за собой файлы темпа
@@ -429,13 +429,15 @@ public class PdfViewerController implements Initializable {
             if (!Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\").toFile().exists())
                 Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\").toFile().mkdirs();//создаю свою директорию,если ее нету для Windows
             pathDestination = Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\" + new Date().getTime() + ".pdf");
+            fullNameFile=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"\\"+row.getNameFile();
         } else {
             if (!Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/").toFile().exists())
                 Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/").toFile().mkdirs();//создаю свою директорию,если ее нету для UNIX
             pathDestination = Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/" + new Date().getTime() + ".pdf");//для Unix систем
+            fullNameFile=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"/"+row.getNameFile();
         }
         try {
-            Files.copy(Paths.get(row.getNameFile()), pathDestination, StandardCopyOption.REPLACE_EXISTING);//Первый элемент:что копирую,2ой:куда копирую,3ий:перезаписать,если файл есть.
+            Files.copy(Paths.get(fullNameFile), pathDestination, StandardCopyOption.REPLACE_EXISTING);//Первый элемент:что копирую,2ой:куда копирую,3ий:перезаписать,если файл есть.
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -467,14 +469,11 @@ public class PdfViewerController implements Initializable {
                     updateImage(pagination.getCurrentPageIndex(), DEGREE);//нужно чтобы нормально обновляло
                 }
             });
-            loadFileTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent event) {
-                    pagination.getScene().getRoot().setDisable(false);
-                    AlertUtilNew.showErrorMessage("Could not load file " + file.getName(), loadFileTask.getException(), pagination);
-                }
+            loadFileTask.setOnFailed(event -> {
+                pagination.getScene().getRoot().setDisable(false);
+                AlertUtilNew.showErrorMessage("Could not load file " + file.getName(), loadFileTask.getException(), pagination);
             });
-            pagination.getScene().getRoot().setDisable(true);
+            //pagination.getScene().getRoot().setDisable(true);
             pagesOfSheets = pagination.getCurrentPageIndex();
             executorServiceLoad.submit(loadFileTask);
         }
@@ -499,6 +498,31 @@ public class PdfViewerController implements Initializable {
             else AlertUtilNew.message("Поиск наименования документа в Search.","Такого наименования нет в Search или оно пустое","Закончился поиск.", Alert.AlertType.WARNING);
         }
     }
+
+    /**
+     * Проверка есть ли документ с таким обозначением в архивах Search при нажатии на кнопку "Проверить"
+     */
+    @FXML
+    private void checkDesignation() {
+        String design=returnDesignation(textFieldDesignation);
+        int baseDocId = S4App.getDocID_ByDesignation(S4App,design);
+        if (baseDocId>0)
+            AlertUtilNew.message("Внимание!", "Такой документ уже есть в архиве.ID документа = " +baseDocId /*S4App.queryFieldByName(S4App,"doc_id")*/, "Сообщение для ознакомления!", Alert.AlertType.WARNING);
+        else
+            AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
+    }
+
+    /**Проверка заполнения обозначения*/
+    private boolean checkDesignationInSearchAndAddVersion(String str){
+        boolean flag;
+        if (strZakazDop.equals(str)){
+            flag=(textFieldDesignation.getText()+" Дополнение №"+textFieldDopNumberPdfView.getText()).length()>=str.length();
+        }else if (str.equals(defaultTextComboBoxMask)){
+            flag=!textFieldDesignation.getText().isEmpty();
+        }else flag=textFieldDesignation.getText().length()==str.length();
+        return flag;
+    }
+
     /**
      * Вешаю слушателя на TextFieldDesignation для проверки и очистки буффера обмена
      */
@@ -524,6 +548,7 @@ public class PdfViewerController implements Initializable {
             }
         });
     }
+
     /**Вешаю слушателя на TextFieldDopNumber для разблокировки кнопки проверить*/
     public void addListenerTextFieldDopNumberPdfView(){
         textFieldDopNumberPdfView.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -532,7 +557,6 @@ public class PdfViewerController implements Initializable {
                 buttonDeductNamePdfView.setDisable(newValue.isEmpty());
                 buttonListVersion.setDisable(newValue.isEmpty());
             }
-            //buttonListVersion.setDisable(newValue.trim().isEmpty());
         });
     }
 
@@ -541,7 +565,9 @@ public class PdfViewerController implements Initializable {
      */
     public void addListenerComboBoxMaskPdfView() {
         comboBoxMaskPdfViewController.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (!defaultTextComboBoxMask.equals(newValue)) {
+            if (newValue!=null && !defaultTextComboBoxMask.equals(newValue)) {
+                System.out.println(newValue);
+                System.out.println(textFieldDesignation);
                 textFieldDesignation.setTextFormatter(TextFormatterUtil.gTextFormatter(newValue, textFieldDesignation));
                 tooltipDesignationPdfView.setText("Ввод только по выбранной маске.");
             }else {
@@ -549,7 +575,7 @@ public class PdfViewerController implements Initializable {
                 textFieldDesignation.clear();
                 tooltipDesignationPdfView.setText("Допускается ввод любого обозначения.");
             }
-            if (newValue.equals(strZakazDop)){
+            if (newValue!=null && newValue.equals(strZakazDop)){
                 labelDopNumberPdfView.setText(" Доп.№");
                 labelDopNumberPdfView.setMinWidth(40);
                 labelDopNumberPdfView.setVisible(true);
@@ -587,7 +613,9 @@ public class PdfViewerController implements Initializable {
     /**Заполнение любого комбоБокса из данных реестра*/
     public void containComboBox(ComboBox comboBox){
         final String idComboBox=comboBox.getId();
-        comboBox.getItems().removeAll(comboBox.getItems());
+        if (!comboBox.getItems().isEmpty()){
+            comboBox.getItems().removeAll(comboBox.getItems());
+        }
         Preferences pref=null;
         if (idComboBox.contains("comboBoxMaskPdfViewController")) {
             comboBox.getItems().add(defaultTextComboBoxMask);
@@ -612,17 +640,6 @@ public class PdfViewerController implements Initializable {
     /**Обертка на главный метод заполнения(Для параллельного программирования).Заполнение ComboBox Масок из реестра при начальной инициализации и при нажатии на кнопку сохранить формы Options*/
     public void containComboBoxMask() {
         containComboBox(comboBoxMaskPdfViewController);
-        /*comboBoxMaskPdfViewController.getItems().removeAll(comboBoxMaskPdfViewController.getItems());
-        comboBoxMaskPdfViewController.getItems().add(defaultTextComboBoxMask);     //Задаю начальные значения в выпадающем списке Масок
-        try {
-            String keys[] = preferencesTableViewInputMask.keys();
-            for (int i = 0; i < keys.length; i++) {
-                comboBoxMaskPdfViewController.getItems().add(keys[i]);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        comboBoxMaskPdfViewController.getSelectionModel().select(0);*/
     }
 
     /**Обертка на главный метод заполнения(Для параллельного программирования).Заполнение ComboBox типы документов,которые хранятся в настройках (чтение таблицы TableViewDocTypes из формы Options)*/
@@ -705,8 +722,6 @@ public class PdfViewerController implements Initializable {
     private void createAndConfigureExecutorsLoadService() {
         executorServiceLoad = Executors.newCachedThreadPool(r -> {
             Thread thread = new Thread(r);
-            //System.out.println(thread.getName());
-            //thread.setDaemon(true);
             thread.setDaemon(true);
             return thread;
         });
@@ -748,17 +763,17 @@ public class PdfViewerController implements Initializable {
     }
 
     // ************** Event Handlers ****************
-
+    /**Увеличение зумма*/
     @FXML
     private void zoomIn() {
         zoom.set(zoom.get() * ZOOM_DELTA);
     }
-
+    /**Уменьшение зумма*/
     @FXML
     private void zoomOut() {
         zoom.set(zoom.get() / ZOOM_DELTA);
     }
-
+    /**Максимально по высоте*/
     @FXML
     private void zoomFit() {
         // TODO: the -20 is a kludge to account for the width of the scrollbars, if showing.
@@ -766,7 +781,7 @@ public class PdfViewerController implements Initializable {
         double verticalZoom = (scroller.getHeight() - 20) / currentPageDimensions.height;
         zoom.set(Math.min(horizZoom, verticalZoom));
     }
-
+    /**Максимально по высоте*/
     @FXML
     private void zoomWidth() {
         zoom.set((scroller.getWidth() - 20) / currentPageDimensions.width);
@@ -840,21 +855,14 @@ public class PdfViewerController implements Initializable {
             }
         };
 
-        updateImageTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                pagination.getScene().getRoot().setDisable(false);
-                currentImage.set(updateImageTask.getValue());
-            }
+        updateImageTask.setOnSucceeded(event -> {
+            pagination.getScene().getRoot().setDisable(false);
+            currentImage.set(updateImageTask.getValue());
         });
 
-        updateImageTask.setOnFailed(new EventHandler<WorkerStateEvent>() {
-            @Override
-            public void handle(WorkerStateEvent event) {
-                pagination.getScene().getRoot().setDisable(false);
-                updateImageTask.getException().printStackTrace();
-            }
-
+        updateImageTask.setOnFailed(event -> {
+            pagination.getScene().getRoot().setDisable(false);
+            updateImageTask.getException().printStackTrace();
         });
 
         pagination.getScene().getRoot().setDisable(true);
@@ -892,7 +900,7 @@ public class PdfViewerController implements Initializable {
             list = file.listFiles();
             for (int i = 0; i < list.length; i++) {
                 if (list[i].isFile() && (list[i].getName().endsWith(".pdf") || list[i].getName().endsWith(".PDF"))) {
-                    showStringData(list[i].getAbsolutePath());
+                    showStringData(list[i].getName());
                     sum++;
                 }
             }

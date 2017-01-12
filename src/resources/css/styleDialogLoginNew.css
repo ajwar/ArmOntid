@@ -1,13 +1,3 @@
-/*.dialogLogin{
-    -fx-background-image: url("background.jpg");
-}
-.dialogLogin:header *.header-panel{
-    -fx-background-color: #7dff8c;
-    !*-fx-background-image: url("../resources.images/background.jpg");*!
-}*/
-/*.dialog-pane:header *.header-panel{
-    -fx-background-color: #7dff8c
-}*/
 .button {
     -fx-background-radius: 15;
     -fx-border-color: #0825ff;
@@ -29,7 +19,3 @@
     -fx-text-fill: white;
     -fx-font-family: "Arial Narrow";
 }
-/*
-.root{
-    -fx-background-color: #7dff8c;
-}*/

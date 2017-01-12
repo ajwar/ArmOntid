@@ -4,6 +4,7 @@ package com.yandex.ajwar.util;
  */
 
 import com.sun.javafx.stage.StageHelper;
+import com.yandex.ajwar.MainApp;
 import com.yandex.ajwar.view.MainWindowController;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -28,12 +29,13 @@ import javafx.util.Pair;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import org.apache.log4j.Logger;
 
 public class AlertUtilNew extends Application {
     private static double xOffset = 0;
     private static double yOffset = 0;
-    private static Stage stage;
-    // private static boolean FL= false;
+    //private static Stage stage;
+    private static final Logger log=Logger.getLogger(MainApp.class);
 
     /**
      * Вывод Сообщения с логином и паролем
@@ -49,6 +51,7 @@ public class AlertUtilNew extends Application {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
+
         //Добавляем лабели и текстфилды
         TextField username = new TextField();
         username.setPromptText("Логин");
@@ -91,14 +94,12 @@ public class AlertUtilNew extends Application {
         Platform.runLater(() -> username.requestFocus());
 
         HBox hBox = new HBox(loginButton, cancelButton);
-        //HBox hBox=new HBox(dialog.getDialogPane());
         hBox.setSpacing(8);
         grid.add(hBox, 1, 3);
 
 
         //делаем прозрачную сцену и окно
-        Scene scene = null;
-        scene = new Scene(root, 400, 400, Color.TRANSPARENT);
+        Scene scene = new Scene(root, 400, 400, Color.TRANSPARENT);
         Stage stage = new Stage();
         stage.setScene(scene);
         scene.getStylesheets().add(AlertUtilNew.class.getResource("/css/styleDialogLoginNew.css").toExternalForm());
@@ -128,6 +129,7 @@ public class AlertUtilNew extends Application {
                 MainWindowController.setFL(true);
                 stage.close();
             } else {
+                log.warn("Была неверная попытка входа в настройки опций пользователем "+ System.getProperty("user.name"));
                 AlertUtilNew.message("Произошла ошибка.", "Введен неправильгый логин или пароль.Проверьте раскладку клавиатуры и Caps Lock.",
                         "Ошибка при заполнении данных.", Alert.AlertType.ERROR);
             }
@@ -137,6 +139,7 @@ public class AlertUtilNew extends Application {
                 MainWindowController.setFL(true);
                 stage.close();
             } else {
+                log.warn("Была неверная попытка входа в настройки опций пользователем "+ System.getProperty("user.name"));
                 AlertUtilNew.message("Произошла ошибка.", "Введен неправильгый логин или пароль.Проверьте раскладку клавиатуры и Caps Lock.",
                         "Ошибка при заполнении данных.", Alert.AlertType.ERROR);
             }
@@ -164,7 +167,7 @@ public class AlertUtilNew extends Application {
      * Вывод сообщения об ошибке
      */
     public static void showErrorMessage(String message, Throwable exception, Control control) {
-
+        log.error(message,exception);
         final Stage dialog = new Stage();
         dialog.initOwner(control.getScene().getWindow());
         dialog.initStyle(StageStyle.UNDECORATED);
@@ -179,12 +182,7 @@ public class AlertUtilNew extends Application {
         final HBox detailsLabelHolder = new HBox();
 
         Button closeButton = new Button("Да");
-        closeButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                dialog.hide();
-            }
-        });
+        closeButton.setOnAction(event -> dialog.hide());
         HBox closeButtonHolder = new HBox();
         closeButtonHolder.getChildren().add(closeButton);
         closeButtonHolder.setAlignment(Pos.CENTER);
@@ -193,19 +191,13 @@ public class AlertUtilNew extends Application {
         details.setExpanded(false);
         details.setAnimated(false);
 
-        details.expandedProperty().addListener(new ChangeListener<Boolean>() {
-
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable,
-                                Boolean oldValue, Boolean newValue) {
-                if (newValue) {
-                    detailsLabelHolder.getChildren().add(detailsLabel);
-                } else {
-                    detailsLabelHolder.getChildren().remove(detailsLabel);
-                }
-                dialog.sizeToScene();
+        details.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                detailsLabelHolder.getChildren().add(detailsLabel);
+            } else {
+                detailsLabelHolder.getChildren().remove(detailsLabel);
             }
-
+            dialog.sizeToScene();
         });
         final Scene scene = new Scene(root);
         dialog.setScene(scene);

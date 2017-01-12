@@ -18,6 +18,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.net.URL;
@@ -35,6 +36,7 @@ public class OptionsController implements Initializable{
 
     private MainApp mainApp;
     private S4AppUtil S4App= S4AppUtil.getInstance();
+    private static final Logger log=Logger.getLogger(MainApp.class);
     private Stage optionsDialogStage;
     private Preferences preferencesScanKdAndTd=MainApp.getPreferencesScanKdAndTd();
     private Preferences preferencesTableViewDocTypes=MainApp.getPreferencesTableViewDocTypes();
@@ -49,7 +51,6 @@ public class OptionsController implements Initializable{
                                     "ЭСКИЗ-*.**.*.***.***",
                                     "**-****",
                                     "**-**** Дополнение №*"};
-
     private ExecutorService executorServiceLoad;
     //private static ExecutorService executorServiceLoad=getMainApp().getPdfViewerController().getExecutorServiceLoad();
     //private PdfViewerController pdfViewerController=getMainApp().getPdfViewerController();
@@ -92,19 +93,13 @@ public class OptionsController implements Initializable{
     @FXML
     private CheckBox checkBoxScanKdVersionOptions;
 
+    /**вешаю слушателя на чекбоксы скрытия Tab'ov*/
     private void addListenerCheckBox(){
         checkBoxScanKdOptions.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            /*if (newValue){
-                checkBoxScanKdNewOptions.setDisable(false);
-                checkBoxScanKdVersionOptions.setDisable(false);
-                checkBoxScanKdNewOptions.selectedProperty().set(newValue);
-                checkBoxScanKdVersionOptions.selectedProperty().set(newValue);
-            }else {*/
                 checkBoxScanKdNewOptions.setDisable(!newValue);
                 checkBoxScanKdVersionOptions.setDisable(!newValue);
                 checkBoxScanKdNewOptions.selectedProperty().set(newValue);
                 checkBoxScanKdVersionOptions.selectedProperty().set(newValue);
-            //}
         });
     }
 
@@ -114,9 +109,7 @@ public class OptionsController implements Initializable{
         getMainApp().getPdfViewerController().containComboBoxDocTypes();
         getMainApp().getPdfViewerController().containComboBoxFormats();
         getMainApp().getPdfViewerController().containComboBoxMask();
-        //Потом вешаю слушателей на компоненты формы
-        //getMainApp().getPdfViewerController().addListenerComboBoxMaskPdfView();
-        //getMainApp().getPdfViewerController().addListenerTextFieldDesignation();
+        getMainApp().getPdfViewerController().disableFormPdfView();
     }
     /**Инициализация кэшированного пула потоков*/
     private void createAndConfigureExecutorsLoadService() {
@@ -177,10 +170,7 @@ public class OptionsController implements Initializable{
                 preferencesTableViewFormats.put(formats.getFormat(), "" + i++);
             }
             labelSaveNotice.setText("Изменения сохранены.");
-            //executorServiceLoad.submit(this::updatePdfViewAfterClickSave);
             Platform.runLater(() ->updatePdfViewAfterClickSave());
-           // Platform.runLater(() -> );
-           // Platform.runLater(() -> );
         }
     }
     /**Заполнения таблицы Маски по нажатию кнопки "Добавить"*/
@@ -210,7 +200,7 @@ public class OptionsController implements Initializable{
                 comboBoxScanKDTypeDoc.getItems().add(S4AppThread.queryFieldByName(S4AppThread,"doc_name"));
             }
             S4AppThread.closeQuery(S4AppThread);
-            comboBoxScanKDTypeDoc.getSelectionModel().select(1);
+            comboBoxScanKDTypeDoc.getSelectionModel().select(0);
         } finally {
             //Закрываю поток в любом случае
             S4AppUtil.closeThreadS4App();
@@ -308,11 +298,6 @@ public class OptionsController implements Initializable{
         tableColumnFormats.setCellValueFactory(new PropertyValueFactory<>("format"));
         initTableColumnNumberMask();
         initTableColumnNumberFormats();
-        /*comboBoxMask.getItems().add("ВИЕЛ.**.*.***.***");
-        comboBoxMask.getItems().add("ВИЕЛ.******.***");
-        comboBoxMask.getItems().add("*ВЩ.***.***");
-        comboBoxMask.getItems().add("Э-*.**.*.***.***");
-        comboBoxMask.getItems().add("ЭСКИЗ-*.**.*.***.***");*/
         comboBoxMask.getItems().addAll(listMask);
         comboBoxMask.getSelectionModel().select(0);
         containTableViewFormats();//Первичная и единственная инициализация таблицы форматов

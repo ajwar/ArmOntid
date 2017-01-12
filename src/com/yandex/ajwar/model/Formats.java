@@ -26,7 +26,5 @@ public class Formats {
 
     public Formats(String format) {
         this.format = new SimpleStringProperty(format);
-
-
     }
 }

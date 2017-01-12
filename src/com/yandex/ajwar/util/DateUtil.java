@@ -17,7 +17,6 @@ public class DateUtil {
         String date = new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         LocalDate localDate = LocalDate.parse(date , formatter);
-
         return localDate;
     }
     /**Перевожу дату в формат понятный MSSQL*/

@@ -2,8 +2,6 @@ package com.yandex.ajwar.model;
 
 import javafx.beans.property.SimpleStringProperty;
 
-import javax.tools.SimpleJavaFileObject;
-
 /**
  * Created by 53189 on 02.12.2016.
  */
@@ -27,6 +25,5 @@ public class InputMask {
 
     public InputMask(String mask) {
         this.mask =new SimpleStringProperty(mask);
-
     }
 }

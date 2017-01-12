@@ -34,8 +34,7 @@ public class TextFormatterUtil {
                 }
             };
             filter= c -> {
-                if (c.getControlNewText().length()==1 && "0".equals(c.getText())) return null;
-                if (c.getControlNewText().length()==3 && !c.getControlNewText().matches("^([1-9]{1}|[1-9]{1}[0-9]{1}|100)$")) {
+                if ((c.getControlNewText().length()==3 && !c.getControlNewText().matches("^([1-9]{1}|[1-9]{1}[0-9]{1}|100)$")) || (c.getControlNewText().length()==1 && "0".equals(c.getText()))) {
                     return null;
                 }
                 if ((!c.getText().matches("\\d") && c.isAdded()) || c.getControlNewText().length()>3) return null;
