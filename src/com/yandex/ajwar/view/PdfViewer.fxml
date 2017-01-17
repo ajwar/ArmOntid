@@ -44,7 +44,7 @@
                                     <children>
                                         <VBox prefHeight="819.0" prefWidth="300.0" spacing="3.0" styleClass="background" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
-                                                <TableView fx:id="listFileTable" onMouseClicked="#onMouseClickedTableListFile" prefHeight="250.0" prefWidth="300.0">
+                                                <TableView fx:id="listFileTable" prefHeight="250.0" prefWidth="300.0">
                                                     <columns>
                                                         <TableColumn fx:id="filePathColumn" editable="false" minWidth="-1.0" prefWidth="-1.0" text="Список файлов" />
                                                     </columns>

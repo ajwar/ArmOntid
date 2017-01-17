@@ -32,6 +32,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -414,74 +416,80 @@ public class PdfViewerController implements Initializable {
     }
 
     /**
-     * Отображение пдф файла при нажатии на список таблицы
+     * Отображение пдф файла при двойном нажатии на список таблицы
      */
-    @FXML
-    private void onMouseClickedTableListFile() {
-        pagination.getScene().getRoot().setDisable(true);
-        disableButton(false);
-        StringData row = listFileTable.getSelectionModel().getSelectedItem();
-        String fullNameFile;
-        if (row == null) return;
-        Path pathDestination;
-        //Подчищаю за собой файлы темпа
-        if (deleteMusorPath != null && deleteMusorPath.getParent().toFile().isDirectory()) {
-            File[] list = deleteMusorPath.getParent().toFile().listFiles();
-            for (int i = 0; i < list.length; i++) {
-                list[i].delete();
-            }
-        }
-        if (System.getProperty("os.name").indexOf("Win") != -1) {
-            if (!Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\").toFile().exists())
-                Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\").toFile().mkdirs();//создаю свою директорию,если ее нету для Windows
-            pathDestination = Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\" + new Date().getTime() + ".pdf");
-            fullNameFile=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"\\"+row.getNameFile();
-        } else {
-            if (!Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/").toFile().exists())
-                Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/").toFile().mkdirs();//создаю свою директорию,если ее нету для UNIX
-            pathDestination = Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/" + new Date().getTime() + ".pdf");//для Unix систем
-            fullNameFile=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"/"+row.getNameFile();
-        }
-        try {
-            Files.copy(Paths.get(fullNameFile), pathDestination, StandardCopyOption.REPLACE_EXISTING);//Первый элемент:что копирую,2ой:куда копирую,3ий:перезаписать,если файл есть.
-        } catch (IOException e) {
-            log.error("Не смог скопировать этот файл:"+ fullNameFile,e);
-            e.printStackTrace();
-        }
-        deleteMusorPath = pathDestination;//даю ссылку на файл
-        final File file = pathDestination.toFile();
-        if (file != null) {
-            Window window = pagination.getScene().getWindow();  //получаю ссылку на окно,где находится Pagination
-            if (window instanceof Stage) {  //проверяю тип окна
-                ((Stage) window).setTitle(file.getName());   //назначаю Титульник по названию выделенному файлу
-            }
-            final Task<PDFFile> loadFileTask = new Task<PDFFile>() {
-                @Override
-                protected PDFFile call() throws Exception {
-                    try (
-                            RandomAccessFile raf = new RandomAccessFile(file, "r");
-                            FileChannel channel = raf.getChannel()
-                    ) {
-                        ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
-                        return new PDFFile(buffer);
+    private void addListenerTableViewList(){
+        listFileTable.setOnMouseClicked(mouseEvent -> {
+            if (mouseEvent.getButton().equals(MouseButton.PRIMARY)){
+                if (mouseEvent.getClickCount()==2){
+                    StringData row = listFileTable.getSelectionModel().getSelectedItem();
+                    pagination.getScene().getRoot().setDisable(true);
+                    disableButton(false);
+                    String fullNameFile;
+                    if (row == null) return;
+                    Path pathDestination;
+                    //Подчищаю за собой файлы темпа
+                    if (deleteMusorPath != null && deleteMusorPath.getParent().toFile().isDirectory()) {
+                        File[] list = deleteMusorPath.getParent().toFile().listFiles();
+                        for (int i = 0; i < list.length; i++) {
+                            list[i].delete();
+                        }
                     }
+                    if (System.getProperty("os.name").indexOf("Win") != -1) {
+                        if (!Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\").toFile().exists())
+                            Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\").toFile().mkdirs();//создаю свою директорию,если ее нету для Windows
+                        pathDestination = Paths.get(System.getProperty("user.home") + "\\AppData\\Local\\Temp\\ScanKdAndTd\\" + new Date().getTime() + ".pdf");
+                        fullNameFile=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"\\"+row.getNameFile();
+                    } else {
+                        if (!Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/").toFile().exists())
+                            Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/").toFile().mkdirs();//создаю свою директорию,если ее нету для UNIX
+                        pathDestination = Paths.get(System.getProperty("user.home") + "/ScanKdAndTd/" + new Date().getTime() + ".pdf");//для Unix систем
+                        fullNameFile=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"/"+row.getNameFile();
+                    }
+                    try {
+                        Files.copy(Paths.get(fullNameFile), pathDestination, StandardCopyOption.REPLACE_EXISTING);//Первый элемент:что копирую,2ой:куда копирую,3ий:перезаписать,если файл есть.
+                    } catch (IOException e) {
+                        log.error("Не смог скопировать этот файл:"+ fullNameFile,e);
+                        e.printStackTrace();
+                    }
+                    deleteMusorPath = pathDestination;//даю ссылку на файл
+                    final File file = pathDestination.toFile();
+                    if (file != null) {
+                        Window window = pagination.getScene().getWindow();  //получаю ссылку на окно,где находится Pagination
+                        if (window instanceof Stage) {  //проверяю тип окна
+                            ((Stage) window).setTitle(file.getName());   //назначаю Титульник по названию выделенному файлу
+                        }
+                        final Task<PDFFile> loadFileTask = new Task<PDFFile>() {
+                            @Override
+                            protected PDFFile call() throws Exception {
+                                try (
+                                        RandomAccessFile raf = new RandomAccessFile(file, "r");
+                                        FileChannel channel = raf.getChannel()
+                                ) {
+                                    ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+                                    return new PDFFile(buffer);
+                                }
+                            }
+                        };
+                        loadFileTask.setOnSucceeded(event -> {
+                            pagination.getScene().getRoot().setDisable(false);
+                            final PDFFile pdfFile = loadFileTask.getValue();
+                            currentFile.set(pdfFile);
+                            updateImage(pagination.getCurrentPageIndex(), DEGREE);//нужно чтобы нормально обновляло
+                        });
+                        loadFileTask.setOnFailed(event -> {
+                            pagination.getScene().getRoot().setDisable(false);
+                            log.error("Could not load file " + file.getName(),loadFileTask.getException());
+                            AlertUtilNew.showErrorMessage("Could not load file " + file.getName(), loadFileTask.getException(), pagination);
+                        });
+                        //pagination.getScene().getRoot().setDisable(true);
+                        pagesOfSheets = pagination.getCurrentPageIndex();
+                        executorServiceLoad.submit(loadFileTask);
+                    }
+
                 }
-            };
-            loadFileTask.setOnSucceeded(event -> {
-                pagination.getScene().getRoot().setDisable(false);
-                final PDFFile pdfFile = loadFileTask.getValue();
-                currentFile.set(pdfFile);
-                updateImage(pagination.getCurrentPageIndex(), DEGREE);//нужно чтобы нормально обновляло
-            });
-            loadFileTask.setOnFailed(event -> {
-                pagination.getScene().getRoot().setDisable(false);
-                log.error("Could not load file " + file.getName(),loadFileTask.getException());
-                AlertUtilNew.showErrorMessage("Could not load file " + file.getName(), loadFileTask.getException(), pagination);
-            });
-            //pagination.getScene().getRoot().setDisable(true);
-            pagesOfSheets = pagination.getCurrentPageIndex();
-            executorServiceLoad.submit(loadFileTask);
-        }
+            }
+        });
     }
 
     /**При клике на кнопку Вывод наим.производится считывание из базы Серча наименования предыдущего заказа(выбрана маска "**-**** Дополнение №*")*/
@@ -716,6 +724,7 @@ public class PdfViewerController implements Initializable {
         Platform.runLater(() -> addListenerCheckBoxArbitrarily());
         Platform.runLater(() -> addListenerComboBoxMaskPdfView());
         Platform.runLater(() -> addListenerTextFieldDopNumberPdfView());
+        Platform.runLater(() -> addListenerTableViewList());
         //Platform.runLater(() -> checkNameOfDesignation());
         bindPaginationToCurrentFile();
         createPaginationPageFactory();
@@ -827,7 +836,6 @@ public class PdfViewerController implements Initializable {
                 final int height = (int) (actualPageHeight * zoom.get());
                 // создаю картинку из страницы ПДФ файла
                 java.awt.Image awtImage = page.getImage(width, height, bbox, null, true, true);
-                log.info("Heap memory after!"+Runtime.getRuntime().totalMemory()+"   "+Runtime.getRuntime().maxMemory()+"        "+Runtime.getRuntime().freeMemory());
                 // draw image to buffered image:
                 AffineTransform at = new AffineTransform();
                 BufferedImage buffImage = null;
@@ -867,7 +875,6 @@ public class PdfViewerController implements Initializable {
 
         updateImageTask.setOnFailed(event -> {
             pagination.getScene().getRoot().setDisable(false);
-            log.error("Heap memory!"+Runtime.getRuntime().totalMemory()+"   "+Runtime.getRuntime().maxMemory()+"        "+Runtime.getRuntime().freeMemory());
             log.error("Ошибка при отображении файла pdf.",updateImageTask.getException());
             updateImageTask.getException().printStackTrace();
         });

@@ -25,7 +25,9 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
@@ -62,11 +64,12 @@ public class MainApp extends Application {
             System.exit(0);
         }
         //узнаю где находится запускаемый Jar файл
-        String currentPath=MainApp.class
+        String currentPath=MainApp.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+/*        String currentPath=MainApp.class
                 .getProtectionDomain()
                 .getCodeSource().getLocation()
                 .toURI().getPath()
-                .replace('/', File.separator.charAt(0)).substring(1);
+                .replace('/', File.separator.charAt(0)).substring(1);*/
         //если память кучи меньше 1gb,то перезапускаю программу с нач. 512 мб и конечной 1гб памятью
         if(args.length==0 && Runtime.getRuntime().maxMemory()/1024/1024<980) {
             Runtime.getRuntime().exec("java -jar -Xms512m -Xmx1024m -Dcom.jacob.autogc=TRUE "+currentPath+" restart");
