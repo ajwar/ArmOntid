@@ -10,6 +10,7 @@ import com.yandex.ajwar.view.PdfViewerController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
@@ -19,9 +20,12 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
@@ -51,11 +55,22 @@ public class MainApp extends Application {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws URISyntaxException, IOException {
         double version=Double.parseDouble(System.getProperty("java.specification.version"));
         if (version<1.8){
             log.error("Версия Java, установленная на этой машине(" + version + "), меньше версии необходимой для запуска программы (1.8).");
             System.exit(0);
+        }
+        //узнаю где находится запускаемый Jar файл
+        String currentPath=MainApp.class
+                .getProtectionDomain()
+                .getCodeSource().getLocation()
+                .toURI().getPath()
+                .replace('/', File.separator.charAt(0)).substring(1);
+        //если память кучи меньше 1gb,то перезапускаю программу с нач. 512 мб и конечной 1гб памятью
+        if(args.length==0 && Runtime.getRuntime().maxMemory()/1024/1024<980) {
+            Runtime.getRuntime().exec("java -jar -Xms512m -Xmx1024m -Dcom.jacob.autogc=TRUE "+currentPath+" restart");
+            return;
         }
         launch(args);
     }
@@ -73,6 +88,10 @@ public class MainApp extends Application {
             //минимальные размеры основной формы
             getPrimaryStage().setMinHeight(830);
             getPrimaryStage().setMinWidth(1050);
+            getPrimaryStage().setOnCloseRequest(event -> {
+                log.info("Юзер " + System.getProperty("user.name") + " завершил работу программы ScanKdAndTd.");
+                System.exit(0);
+            });
             setMainWindowController(loader.getController());
             getMainWindowController().setMainApp(this);
         } catch (IOException e) {

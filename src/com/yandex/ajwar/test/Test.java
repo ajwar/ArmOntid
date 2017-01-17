@@ -4,13 +4,16 @@ import com.yandex.ajwar.util.S4AppUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by 53189 on 04.01.2017.
  */
 public class Test {
     public static void main(String[] args) {
-        List<String> list=new ArrayList<>();
+        Properties pr=System.getProperties();
+        pr.list(System.out);
+        /*List<String> list=new ArrayList<>();
         S4AppUtil s4AppUtil=S4AppUtil.getInstance();
         s4AppUtil.login(s4AppUtil);
         int x;
@@ -36,6 +39,6 @@ public class Test {
         System.out.println(sum+"    Количество совпадений разных СП");
         System.out.println(x-sum+"    разница");
         System.out.println((System.currentTimeMillis()-b)+" Столько времени заняла проверка");
-        s4AppUtil.closeQuery(s4AppUtil);
+        s4AppUtil.closeQuery(s4AppUtil);*/
     }
 }

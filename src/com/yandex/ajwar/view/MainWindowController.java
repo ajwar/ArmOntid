@@ -22,8 +22,6 @@ public class MainWindowController implements Initializable {
     private static volatile boolean FL=false;
     /*@FXML
     private ScrollPane scrollerMainWindow;*/
-
-
     /**
      * Выход
      */
@@ -31,7 +29,6 @@ public class MainWindowController implements Initializable {
     private void handleExit() {
         log.info("Юзер " + System.getProperty("user.name") + " завершил работу ScanKdAndTd.");
         System.exit(0);
-        //ComThread.quitMainSTA();
     }
 
     /**
@@ -41,6 +38,7 @@ public class MainWindowController implements Initializable {
     private void handleAboutMe() {
         AlertUtilNew.message("Программа для сканирования документации.", "Автор:Шагов Айвар\r\nОтдел АСУ\r\nтелефон 22-35", "Информация о разработчике.", Alert.AlertType.INFORMATION);
     }
+
     /**
      * Загрузка формы Options,с проверкой логина или пароля
      */
@@ -64,7 +62,7 @@ public class MainWindowController implements Initializable {
                 Platform.runLater(()->{
                 log.info("Юзер " + System.getProperty("user.name") + " завершил работу ScanKdAndTd.");
                 AlertUtilNew.message("Внимание!", "Перед запуском программы зайдите в Search под своим логином и запустите повторно.", "Не выполнен вход в систему Search.", Alert.AlertType.WARNING);
-                    System.exit(0);
+                System.exit(0);
                 });
         }
     }

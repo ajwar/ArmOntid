@@ -156,6 +156,7 @@ public class OptionsController implements Initializable{
                 preferencesTableViewInputMask.clear();
                 preferencesTableViewFormats.clear();
             } catch (BackingStoreException e) {
+                log.error("Ошибка при очистке реестра.",e);
                 e.printStackTrace();
             }
             for (DocTypes types : tableViewDocTypes.getItems()) {
@@ -326,6 +327,7 @@ public class OptionsController implements Initializable{
                 tableViewFormats.getItems().add(new Formats(keysFormats[i]));
             }
         } catch (BackingStoreException e) {
+            log.error("Ошибка при чтении реестра и заполнения таблиц.",e);
             e.printStackTrace();
         }
     }

@@ -21,6 +21,8 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.*;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -219,6 +221,7 @@ public class PdfViewerController implements Initializable {
         buttonExportInSearch.setDisable(flag);
         buttonAddVersionInSearch.setDisable(flag);
     }
+
     /**Невидимость форм окна при изменении в опциях ЧекБоксов*/
     public void disableFormPdfView(){
         if (!preferencesScanKdAndTd.getBoolean("checkBoxScanKdOptions",true)){
@@ -281,6 +284,7 @@ public class PdfViewerController implements Initializable {
             try {
                 Files.copy(Paths.get(fullFileName), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
+                log.error("Ошибка при копировании файла.",e);
                 e.printStackTrace();
             }
             long id = S4App.createFileDocumentWithDocType(S4App,path, docType, archive, designation, textAreaName.getText(), SECTION_ID);//создаю документ
@@ -290,6 +294,7 @@ public class PdfViewerController implements Initializable {
                     S4App.setFieldValue(S4App,"Формат", comboBoxFormatPdfViewController.getSelectionModel().getSelectedItem());
                     S4App.setFieldValue(S4App,"Кол-во листов", labelNumberOfSheets.getText());
                 } catch (Exception e) {
+                    log.error("Ошибка при добавлении в файл в Search параметров формат и кол-во листов.Файл с айди="+id,e);
                     e.printStackTrace();
                 }
                 if (checkBoxRegOtd.isSelected()) {
@@ -300,7 +305,7 @@ public class PdfViewerController implements Initializable {
                 S4App.checkIn(S4App);//возвращаю файл в архив
                 S4App.closeDocument(S4App);//
                 AlertUtilNew.message("Удачная регистрация.", "Айди документа=" + id, "Сканированный документ занесен в архив.", Alert.AlertType.INFORMATION);
-                new File(listFileTable.getSelectionModel().getSelectedItem().getNameFile()).delete(); //удаляю файл после удачной регистрации
+                new File(fullFileName).delete(); //удаляю файл после удачной регистрации
                 updateTableView();//обновляю файлы в списке
                 disableButton(true);//Запрещаю нажатие на кнопку
             } else {
@@ -353,6 +358,7 @@ public class PdfViewerController implements Initializable {
                 try {
                     Files.copy(Paths.get(fullFileName), Paths.get(stringVersionFileName), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
+                    log.error("Произошла ошибка при копировании файла:"+fullFileName,e);
                     e.printStackTrace();
                 }
                 S4App.openDocVersion(S4App,baseDocId, S4App.getDocMaxVersionID(S4App,baseDocId));
@@ -371,7 +377,7 @@ public class PdfViewerController implements Initializable {
                 S4App.closeDocument(S4App);
                 AlertUtilNew.message("Удачная регистрация версии документа.", "Ошибок при занесении в архив нет.", "Добавлена новая версия документа.", Alert.AlertType.INFORMATION);
                 disableButton(true);//Запрещаю нажатие на кнопку
-                new File(listFileTable.getSelectionModel().getSelectedItem().getNameFile()).delete(); //удаляю файл после удачной регистрации
+                new File(fullFileName).delete(); //удаляю файл после удачной регистрации
                 updateTableView();//обновляю файлы в списке
             } else if (baseDocId == 0)
                 AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.WARNING);
@@ -439,6 +445,7 @@ public class PdfViewerController implements Initializable {
         try {
             Files.copy(Paths.get(fullNameFile), pathDestination, StandardCopyOption.REPLACE_EXISTING);//Первый элемент:что копирую,2ой:куда копирую,3ий:перезаписать,если файл есть.
         } catch (IOException e) {
+            log.error("Не смог скопировать этот файл:"+ fullNameFile,e);
             e.printStackTrace();
         }
         deleteMusorPath = pathDestination;//даю ссылку на файл
@@ -460,17 +467,15 @@ public class PdfViewerController implements Initializable {
                     }
                 }
             };
-            loadFileTask.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                @Override
-                public void handle(WorkerStateEvent event) {
-                    pagination.getScene().getRoot().setDisable(false);
-                    final PDFFile pdfFile = loadFileTask.getValue();
-                    currentFile.set(pdfFile);
-                    updateImage(pagination.getCurrentPageIndex(), DEGREE);//нужно чтобы нормально обновляло
-                }
+            loadFileTask.setOnSucceeded(event -> {
+                pagination.getScene().getRoot().setDisable(false);
+                final PDFFile pdfFile = loadFileTask.getValue();
+                currentFile.set(pdfFile);
+                updateImage(pagination.getCurrentPageIndex(), DEGREE);//нужно чтобы нормально обновляло
             });
             loadFileTask.setOnFailed(event -> {
                 pagination.getScene().getRoot().setDisable(false);
+                log.error("Could not load file " + file.getName(),loadFileTask.getException());
                 AlertUtilNew.showErrorMessage("Could not load file " + file.getName(), loadFileTask.getException(), pagination);
             });
             //pagination.getScene().getRoot().setDisable(true);
@@ -566,8 +571,6 @@ public class PdfViewerController implements Initializable {
     public void addListenerComboBoxMaskPdfView() {
         comboBoxMaskPdfViewController.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue!=null && !defaultTextComboBoxMask.equals(newValue)) {
-                System.out.println(newValue);
-                System.out.println(textFieldDesignation);
                 textFieldDesignation.setTextFormatter(TextFormatterUtil.gTextFormatter(newValue, textFieldDesignation));
                 tooltipDesignationPdfView.setText("Ввод только по выбранной маске.");
             }else {
@@ -629,6 +632,7 @@ public class PdfViewerController implements Initializable {
         try {
             keys = pref.keys();
         } catch (Exception e) {
+            log.error("Ошибка при чтении реестра.",e);
             e.printStackTrace();
         }
         for (int i = 0; i < keys.length; i++) {
@@ -823,6 +827,7 @@ public class PdfViewerController implements Initializable {
                 final int height = (int) (actualPageHeight * zoom.get());
                 // создаю картинку из страницы ПДФ файла
                 java.awt.Image awtImage = page.getImage(width, height, bbox, null, true, true);
+                log.info("Heap memory after!"+Runtime.getRuntime().totalMemory()+"   "+Runtime.getRuntime().maxMemory()+"        "+Runtime.getRuntime().freeMemory());
                 // draw image to buffered image:
                 AffineTransform at = new AffineTransform();
                 BufferedImage buffImage = null;
@@ -862,6 +867,8 @@ public class PdfViewerController implements Initializable {
 
         updateImageTask.setOnFailed(event -> {
             pagination.getScene().getRoot().setDisable(false);
+            log.error("Heap memory!"+Runtime.getRuntime().totalMemory()+"   "+Runtime.getRuntime().maxMemory()+"        "+Runtime.getRuntime().freeMemory());
+            log.error("Ошибка при отображении файла pdf.",updateImageTask.getException());
             updateImageTask.getException().printStackTrace();
         });
 
