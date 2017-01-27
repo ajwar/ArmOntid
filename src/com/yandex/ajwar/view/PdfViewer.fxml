@@ -402,7 +402,143 @@
         </Tab>
         <Tab fx:id="tabScanTdPdfView" closable="false" styleClass="specialTab" text="   Сканирование ТД   ">
             <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <VBox spacing="7.0" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <HBox>
+                           <children>
+                              <TableView fx:id="tableViewObjectTp" maxHeight="200.0" prefHeight="126.0" prefWidth="711.0">
+                                <columns>
+                                    <TableColumn fx:id="tableColNumberObjectTp" editable="false" maxWidth="30.0" minWidth="25.0" prefWidth="-1.0" text="№" />
+                                  <TableColumn fx:id="tableColDesignObjectTp" editable="false" minWidth="-1.0" prefWidth="168.0" text="Обозначение объекта" />
+                                  <TableColumn fx:id="tableColNameObjectTp" editable="false" minWidth="50.0" prefWidth="500.0" text="Наименование объекта" />
+                                </columns>
+                              </TableView>
+                              <VBox spacing="30.0">
+                                 <HBox.margin>
+                                    <Insets left="20.0" />
+                                 </HBox.margin>
+                                 <children>
+                                    <Button minHeight="35.0" mnemonicParsing="false" onAction="#clickButtonSelectInSearchObject" text="Выбрать из Search" />
+                                    <Button layoutX="10.0" layoutY="10.0" minHeight="35.0" mnemonicParsing="false" text="Удалить объект" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <HBox minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Маршрутная карта" />
+                              <TextField fx:id="textFieldPathMapTd" minHeight="25.0">
+                                 <tooltip>
+                                    <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
+                                 </tooltip></TextField>
+                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="217.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Комплектовочная карта" />
+                              <TextField fx:id="textFieldSetMapTd" minHeight="25.0">
+                                 <tooltip>
+                                    <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
+                                 </tooltip></TextField>
+                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="249.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Ведомость материалов" />
+                              <TextField fx:id="textFieldSheetMaterialTd" minHeight="25.0">
+                                 <tooltip>
+                                    <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
+                                 </tooltip></TextField>
+                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="281.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Операционная карта" />
+                              <TextField fx:id="textFieldOperationMapTd" minHeight="25.0">
+                                 <tooltip>
+                                    <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
+                                 </tooltip></TextField>
+                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="313.0" minHeight="25.0">
+                           <children>
+                              <TableView fx:id="tableViewMapSketchTd" editable="true" maxHeight="125.0" prefHeight="100.0" prefWidth="350.0">
+                                <columns>
+                                    <TableColumn fx:id="tableColNumberMapSketch" maxWidth="30.0" minWidth="25.0" prefWidth="-1.0" text="№" />
+                                  <TableColumn fx:id="tableColTextFieldMapSketch" prefWidth="160.0" text="Карта эскизов и схем" />
+                                  <TableColumn fx:id="tableColButtonMapSketch" prefWidth="150.0" text="Сканировать" />
+                                </columns>
+                              </TableView>
+                              <VBox spacing="25.0">
+                                 <HBox.margin>
+                                    <Insets left="25.0" />
+                                 </HBox.margin>
+                                 <children>
+                                    <Button minHeight="30.0" mnemonicParsing="false" onAction="#addMapSketch" text="Добавить карту эскизов" />
+                                    <Button maxHeight="25.0" minHeight="30.0" mnemonicParsing="false" text="Удалить карту эскизов" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <HBox>
+                           <children>
+                              <TableView fx:id="tableViewNumberSheet" editable="true" maxHeight="100.0" prefHeight="100.0" prefWidth="350.0">
+                                <columns>
+                                  <TableColumn fx:id="tableColNumberSheet" maxWidth="30.0" minWidth="25.0" prefWidth="-1.0" text="№" />
+                                    <TableColumn fx:id="tableColDesignNumSheet" prefWidth="310.0" text="Номер ведомости ТП на покрытие" />
+                                </columns>
+                              </TableView>
+                              <VBox spacing="15.0">
+                                 <children>
+                                    <Button minHeight="30.0" mnemonicParsing="false" onAction="#addNumberSheet" text="Добавить ведомость" />
+                                    <Button minHeight="30.0" mnemonicParsing="false" text="Удалить ведомость" />
+                                 </children>
+                                 <HBox.margin>
+                                    <Insets left="25.0" />
+                                 </HBox.margin>
+                              </VBox>
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="377.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Маршрут изготовления" />
+                              <TextField minHeight="25.0" />
+                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="409.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Наименование бюро разработчика" />
+                              <TextField minHeight="25.0" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="441.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Инвентарный номер документа ОТД" />
+                              <TextField minHeight="25.0" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="473.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="Номер изменения документа" />
+                              <TextField fx:id="textFieldNumberIITd" minHeight="25.0" />
+                           </children>
+                        </HBox>
+                        <HBox layoutX="10.0" layoutY="505.0" minHeight="25.0">
+                           <children>
+                              <Label minHeight="25.0" minWidth="200.0" text="ИИ документа" />
+                              <TextField minHeight="25.0" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children></AnchorPane>
             </content>
         </Tab>
     </tabs>

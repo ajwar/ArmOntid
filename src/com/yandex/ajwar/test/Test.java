@@ -1,9 +1,8 @@
 package com.yandex.ajwar.test;
 
+
 import com.yandex.ajwar.util.S4AppUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -12,7 +11,39 @@ import java.util.Properties;
 public class Test {
     public static void main(String[] args) {
         Properties pr=System.getProperties();
-        pr.list(System.out);
+
+        //pr.list(System.out);
+/*        { MorenaSource source= Morena.selectSource(null);
+            System.err.println("Selected source is "+source);
+            if (source!=null)
+            { MorenaImage image=new MorenaImage(source);
+                System.err.println("Size of acquired image is "
+                        +image.getWidth()+" x "
+                        +image.getHeight()+" x "
+                        +image.getPixelSize());
+            }
+            Morena.close();
+        }*/
+        //Sub SelectArticlesSample(ArtKind As Long, SampleName As String, SQLText As String, OrderBy As String)
+        S4AppUtil s4AppUtil=S4AppUtil.getInstance();
+        s4AppUtil.login(s4AppUtil);
+        //s4AppUtil.getImageFromScanner(s4AppUtil,"d:\\Ar.pdf",-1,0,300,1,false,false,false,false);
+        s4AppUtil.hideSearch(s4AppUtil);
+        s4AppUtil.showSearch(s4AppUtil);
+        s4AppUtil.startSelectArticles(s4AppUtil);
+        //s4AppUtil.selectArticles(s4AppUtil);
+
+        /*try {
+            s4AppUtil.selectArticlesSample(s4AppUtil,1,"ArTest","select * from articles","123");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+        s4AppUtil.selectArticlesSample(s4AppUtil,3,"Детали12","#Масса# > 0","");
+        //System.out.println(s4AppUtil.getErrorMessage(s4AppUtil));
+        ///s4AppUtil.selectArticlesBySectID(s4AppUtil,3,-1);
+        //s4AppUtil.showSearch(s4AppUtil);
+        s4AppUtil.endSelectArticles(s4AppUtil);
+
         /*List<String> list=new ArrayList<>();
         S4AppUtil s4AppUtil=S4AppUtil.getInstance();
         s4AppUtil.login(s4AppUtil);

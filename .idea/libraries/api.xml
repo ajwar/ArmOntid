@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="api">
+    <CLASSES />
+    <JAVADOC>
+      <root url="file://C:/Program Files/Java/Libraries/morena-win-6.4.0.6/doc/api" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="file://C:/Program Files/Java/Libraries/morena-win-6.4.0.6/examples/MorenaCapabilities/src" />
+      <root url="file://C:/Program Files/Java/Libraries/morena-win-6.4.0.6/examples/src" />
+    </SOURCES>
+  </library>
+</component>

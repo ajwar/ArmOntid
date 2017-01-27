@@ -1,7 +1,6 @@
 package com.yandex.ajwar;
 
 
-import com.sun.deploy.util.SystemUtils;
 import com.yandex.ajwar.model.StringData;
 import com.yandex.ajwar.util.S4AppUtil;
 import com.yandex.ajwar.view.MainWindowController;
@@ -10,25 +9,19 @@ import com.yandex.ajwar.view.PdfViewerController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Properties;
 import java.util.prefs.Preferences;
 
 public class MainApp extends Application {
@@ -95,6 +88,7 @@ public class MainApp extends Application {
                 log.info("Юзер " + System.getProperty("user.name") + " завершил работу программы ScanKdAndTd.");
                 System.exit(0);
             });
+            //getPrimaryStage().initStyle(StageStyle.UNDECORATED);
             setMainWindowController(loader.getController());
             getMainWindowController().setMainApp(this);
         } catch (IOException e) {

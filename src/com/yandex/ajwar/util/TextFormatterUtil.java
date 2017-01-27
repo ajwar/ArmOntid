@@ -17,6 +17,55 @@ public class TextFormatterUtil {
         UnaryOperator<TextFormatter.Change> filter=null;
         StringConverter<String> converter=null;
         String defaultText="";
+        if ("В25.*****.*****".equals(str)) {
+            defaultText="В25.";
+            converter = new StringConverter<String>() {
+                @Override
+                public String toString(String object) {
+                    if (object == null) return "В25.";
+                    return object.toString();
+                }
+                @Override
+                public String fromString(String string) {
+                    Pattern regexp = Pattern.compile("В25.\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d\\d"); //Пример строки для ВИЕЛ.16.9.154.320
+                    Matcher m = regexp.matcher(string);
+                    if (string.length() == 15 && m.matches()) return string;
+                    else return "В25.";
+
+                }
+            };
+            filter = c -> {
+                if (c.getControlCaretPosition()<"В25.".length()){
+                    c.setCaretPosition("В25.".length());
+                    c.setAnchor("В25.".length());
+                }
+                if (c.getControlNewText().length() == 15 && !c.getControlNewText().matches("В25.\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d\\d")) {
+                    textFieldDesignation.setText("В25.");
+                    textFieldDesignation.positionCaret("В25.".length() + 1);
+                    return null;
+                }
+                if ((!c.getText().matches("\\d") && !c.isDeleted()) || c.getControlNewText().length() < 4 || c.getControlNewText().length() > 15 || (c.getRangeStart() >= 0 && c.getRangeEnd() < 4))
+                    return null;
+                /*if (c.getText().matches("[a-zA-Zа-яА-ЯёЁ]") || c.getControlNewText().length() < 6 || c.getControlNewText().length() > 17
+                        || (c.getRangeStart() >= 0 && c.getRangeEnd() < 5)|| c.getText().matches("\\W") || c.getText().matches("_"))
+                    return null;*/
+                if (c.isAdded()){
+                    int length=c.getControlNewText().length();
+                    if (length==10) {
+                        c.setText(".");
+                        transferCaretPosition(c);
+                    }
+                }
+                if (!c.isDeleted()) {
+                    int caretPosition = c.getControlCaretPosition();
+                    if (caretPosition == 8) {
+                        c.setText(c.getText() + ".");
+                        transferCaretPosition(c);
+                    }
+                }
+                return c;
+            };
+        }
         if ("***".equals(str)){
             defaultText="";
             converter=new StringConverter<String>() {

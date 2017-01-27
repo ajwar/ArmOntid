@@ -1,39 +1,34 @@
 package com.yandex.ajwar.view;
 
-import com.sun.javafx.stage.StageHelper;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import com.yandex.ajwar.MainApp;
-import com.yandex.ajwar.model.StringData;
-import com.yandex.ajwar.util.*;
+import com.yandex.ajwar.model.*;
+import com.yandex.ajwar.util.AlertUtilNew;
+import com.yandex.ajwar.util.DateUtil;
+import com.yandex.ajwar.util.S4AppUtil;
+import com.yandex.ajwar.util.TextFormatterUtil;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.*;
-import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -43,6 +38,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -81,8 +78,10 @@ public class PdfViewerController implements Initializable {
     private volatile static double DEGREE = 0.0d;
     private static final String defaultTextComboBoxMask = "Произвольно";
     private static final String strZakazDop = "**-**** Дополнение №*";
+    private static final String strFormatTd="В25.*****.*****";
     //private final String FULL_PATH_FILE ="\\AppData\\Local\\Temp\\_IMS\\";
     private static final byte SECTION_ID = 1; //Раздел документация(столбец SECTION_ID) в таблице SSECTION
+    private static final byte SECTION_ID_DETAIL=4;
 
     @FXML
     private Pagination pagination;
@@ -98,6 +97,28 @@ public class PdfViewerController implements Initializable {
     private ScrollPane scroller;
     @FXML
     private Tooltip tooltipDesignationPdfView;
+    @FXML
+    private TableView<MapSketch> tableViewMapSketchTd;
+    @FXML
+    private TableColumn<MapSketch,TextField> tableColTextFieldMapSketch;
+    @FXML
+    private TableColumn<MapSketch,Button> tableColButtonMapSketch;
+    @FXML
+    private TableColumn<ObjectTp,Number> tableColNumberMapSketch;
+    @FXML
+    private TableView<ObjectTp> tableViewObjectTp;
+    @FXML
+    private TableColumn<ObjectTp,String> tableColDesignObjectTp;
+    @FXML
+    private TableColumn<ObjectTp,String> tableColNameObjectTp;
+    @FXML
+    private TableColumn<ObjectTp,Number> tableColNumberObjectTp;
+    @FXML
+    private TableView<NumberSheet> tableViewNumberSheet;
+    @FXML
+    private TableColumn<NumberSheet,String> tableColDesignNumSheet;
+    @FXML
+    private TableColumn<ObjectTp,Number> tableColNumberSheet;
     @FXML
     private TableView<StringData> listFileTable;
     @FXML
@@ -128,6 +149,16 @@ public class PdfViewerController implements Initializable {
     private TextField textFieldNumberChange;
     @FXML
     private TextField textFieldDopNumberPdfView;
+    @FXML
+    private TextField textFieldPathMapTd;
+    @FXML
+    private TextField textFieldSetMapTd;
+    @FXML
+    private TextField textFieldSheetMaterialTd;
+    @FXML
+    private TextField textFieldOperationMapTd;
+    @FXML
+    private TextField textFieldNumberIITd;
     @FXML
     private TextArea textAreaName;
     @FXML
@@ -277,12 +308,7 @@ public class PdfViewerController implements Initializable {
             S4App.closeQuery(S4App);
             //присваиваю номер архива в переменную
             long archive = preferencesScanKdAndTd.getLong("textFieldArchiveId", 323);
-            String fullFileName;
-            if (System.getProperty("os.name").indexOf("Win") != -1){
-                fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"\\"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
-            }else {
-                fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"/"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
-            }
+            String fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+System.getProperty("file.separator")+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
             try {
                 Files.copy(Paths.get(fullFileName), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
@@ -351,12 +377,7 @@ public class PdfViewerController implements Initializable {
                 int reasonCode = Integer.parseInt(S4App.queryFieldByName(S4App,"reasoncode"));//код причины изменения из БД Серча
                 S4App.closeQuery(S4App);
                 S4App.createDocVersion(S4App,baseDocId, S4App.getDocMaxVersionID(S4App,baseDocId), versionCode, versionNote, stringVersionFileName, reasonCode, 0);
-                String fullFileName;
-                if (System.getProperty("os.name").indexOf("Win") != -1){
-                    fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"\\"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
-                }else {
-                    fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+"/"+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
-                }
+                String fullFileName=preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home"))+System.getProperty("file.separator")+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
                 try {
                     Files.copy(Paths.get(fullFileName), Paths.get(stringVersionFileName), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
@@ -399,8 +420,10 @@ public class PdfViewerController implements Initializable {
         String design=returnDesignation(textFieldDesignation);
         int id = S4App.getDocID_ByDesignation(S4App,design);
         if (id>0){
+            S4App.hideSearch(S4App);
             S4App.openDocument(S4App,id);
             S4App.showVersionList(S4App);
+            S4App.showSearch(S4App);
             S4App.closeDocument(S4App);
         }else
             AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
@@ -725,6 +748,7 @@ public class PdfViewerController implements Initializable {
         Platform.runLater(() -> addListenerComboBoxMaskPdfView());
         Platform.runLater(() -> addListenerTextFieldDopNumberPdfView());
         Platform.runLater(() -> addListenerTableViewList());
+        Platform.runLater(() -> initTableColumnAll());
         //Platform.runLater(() -> checkNameOfDesignation());
         bindPaginationToCurrentFile();
         createPaginationPageFactory();
@@ -789,12 +813,11 @@ public class PdfViewerController implements Initializable {
     /**Максимально по высоте*/
     @FXML
     private void zoomFit() {
-        // TODO: the -20 is a kludge to account for the width of the scrollbars, if showing.
         double horizZoom = (scroller.getWidth() - 20) / currentPageDimensions.width;
         double verticalZoom = (scroller.getHeight() - 20) / currentPageDimensions.height;
         zoom.set(Math.min(horizZoom, verticalZoom));
     }
-    /**Максимально по высоте*/
+    /**Максимально по ширине*/
     @FXML
     private void zoomWidth() {
         zoom.set((scroller.getWidth() - 20) / currentPageDimensions.width);
@@ -836,7 +859,7 @@ public class PdfViewerController implements Initializable {
                 final int height = (int) (actualPageHeight * zoom.get());
                 // создаю картинку из страницы ПДФ файла
                 java.awt.Image awtImage = page.getImage(width, height, bbox, null, true, true);
-                // draw image to buffered image:
+                //перевожу изображение в буфферное изображение
                 AffineTransform at = new AffineTransform();
                 BufferedImage buffImage = null;
                 if (DEGREE == Math.PI * 2 || DEGREE == -Math.PI * 2) DEGREE = 0d;//Обнуляю угол поворота при 2*ПИ или -2*ПИ
@@ -854,6 +877,10 @@ public class PdfViewerController implements Initializable {
                     at.translate(0, 0);
                     buffImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                 }
+                //Меняю яркость изображения
+                //RescaleOp rescaleOp=new RescaleOp(0.0f,40,null);
+                //BufferedImage bufferedImageOp=rescaleOp.filter(buffImage,buffImage);
+                //Graphics2D g2d = bufferedImageOp.createGraphics();
                 Graphics2D g2d = buffImage.createGraphics();
                 g2d.drawImage(awtImage, at, null);
                 // конвертирую буфферное изображение в картинку Java FX:
@@ -943,5 +970,73 @@ public class PdfViewerController implements Initializable {
     }
     public ExecutorService getExecutorServiceLoad() {
         return executorServiceLoad;
+    }
+
+    //
+    //
+    //  Методы для Техн. Документации
+    //
+    //
+    /**Инициализация Таблиц и Столбцов во вкладке <<Сканирование ТД>>,а также всех тектфилдов.*/
+    private void initTableColumnAll(){
+        tableColDesignObjectTp.setCellValueFactory(new PropertyValueFactory<>("designation"));
+        tableColNameObjectTp.setCellValueFactory(new PropertyValueFactory<>("name"));
+        tableColNumberObjectTp.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewObjectTp.getItems().indexOf(param.getValue())+1));
+        tableColDesignNumSheet.setCellValueFactory(new PropertyValueFactory<>("textFieldDesignNumberSheet"));
+        tableColNumberSheet.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewNumberSheet.getItems().indexOf(param.getValue())+1));
+        tableColButtonMapSketch.setCellValueFactory(new PropertyValueFactory<>("buttonScan"));
+        tableColTextFieldMapSketch.setCellValueFactory(new PropertyValueFactory<>("textFieldDesignMapSketch"));
+        tableColNumberMapSketch.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewMapSketchTd.getItems().indexOf(param.getValue())+1));
+
+        textFieldPathMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(strFormatTd,textFieldPathMapTd));
+        textFieldOperationMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(strFormatTd, textFieldOperationMapTd));
+        textFieldSheetMaterialTd.setTextFormatter(TextFormatterUtil.gTextFormatter(strFormatTd, textFieldSheetMaterialTd));
+        textFieldSetMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(strFormatTd, textFieldSheetMaterialTd));
+        textFieldNumberIITd.setTextFormatter(TextFormatterUtil.gTextFormatter("***",textFieldNumberIITd));
+    }
+
+    /**Выполняется при нажатии на кнопку <<Выбрать из Search>> на вкладке Сканирование КД*/
+    @FXML
+    public void clickButtonSelectInSearchObject(){
+        disableMainWindow(true);
+        executorServiceLoad.submit(this::clickButtonSelectInSearchObjectThread);
+    }
+    /**Запуск в потоке открытия окна выбора объектов из Search*/
+    public void clickButtonSelectInSearchObjectThread(){
+        S4AppUtil S4AppThread =S4AppUtil.returnAndCreateThreadS4App();
+        try {
+            S4AppThread.startSelectArticles(S4AppThread);
+            S4AppThread.hideSearch(S4AppThread);
+            S4AppThread.showSearch(S4AppThread);
+            S4AppThread.selectArticlesBySectID(S4AppThread,SECTION_ID_DETAIL,-1);
+            for (int i = 0; i <S4AppThread.selectedArticlesCount(S4AppThread) ; i++) {
+                S4AppThread.openArticle(S4AppThread,S4AppThread.getSelectedArticleID(S4AppThread,i));
+                tableViewObjectTp.getItems().add(new ObjectTp(S4AppThread.getArticleDesignation(S4AppThread),S4AppThread.getArticleName(S4AppThread)));
+                S4AppThread.closeArticle(S4AppThread);
+            }
+            S4AppThread.endSelectArticles(S4AppThread);
+        }catch (Exception e){
+            log.error("Произошла ошибка при выборе объектов из Search во вкладке <<Сканирование ТД>>",e);
+        }finally {
+            S4AppUtil.closeThreadS4App();
+            disableMainWindow(false);
+        }
+    }
+    @FXML
+    private void addMapSketch(){
+        TextField textField=new TextField();
+        Button button=new Button("Сканировать");
+        Tooltip tooltip=new Tooltip("Допускается ввод только по маске \"В25.*****.*****\"");
+        textField.setTooltip(tooltip);
+        textField.setTextFormatter(TextFormatterUtil.gTextFormatter(strFormatTd,textField));
+        tableViewMapSketchTd.getItems().add(new MapSketch(textField,button));
+    }
+    @FXML
+    private void addNumberSheet(){
+        TextField textField=new TextField();
+        tableViewNumberSheet.getItems().add(new NumberSheet(textField));
+    }
+    private void getPdfFromScanner(){
+
     }
 }

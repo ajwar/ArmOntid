@@ -60,6 +60,18 @@ public class S4AppUtil extends ActiveXComponent{
         ComThread.quitMainSTA();
     }
     //Функции и процедуры Search
+    public void openArticle(ActiveXComponent S4App,long artId){
+        Dispatch.call(S4App,"OpenArticle",artId);
+    }
+    public void closeArticle(ActiveXComponent S4App){
+        Dispatch.call(S4App,"CloseArticle");
+    }
+    public String getArticleDesignation(ActiveXComponent S4App){
+        return Dispatch.call(S4App,"GetArticleDesignation").getString();
+    }
+    public String getArticleName(ActiveXComponent S4App){
+        return Dispatch.call(S4App,"GetArticleName").getString();
+    }
     public int messageBox(ActiveXComponent S4App,String text,String title, int format){
         return Dispatch.call(S4App,"MessageBox",text,title,format).getInt();
     }
@@ -201,5 +213,34 @@ public class S4AppUtil extends ActiveXComponent{
     public String nfoGetUserFullNameByUserID(ActiveXComponent S4App,long userId){
         return Dispatch.call(S4App,"nfoGetUserFullNameByUserID",userId).getString();
     }
-
+    public void startSelectArticles(ActiveXComponent S4App){
+        Dispatch.call(S4App,"StartSelectArticles");
+    }
+    public void selectArticles(ActiveXComponent S4App){
+        Dispatch.call(S4App,"SelectArticles");
+    }
+    public void endSelectArticles(ActiveXComponent S4App){
+        Dispatch.call(S4App,"EndSelectArticles");
+    }
+    public int selectedArticlesCount(ActiveXComponent S4App){
+        return Dispatch.call(S4App,"SelectedArticlesCount").getInt();
+    }
+    public void showSearch(ActiveXComponent S4App){
+        Dispatch.call(S4App,"ShowSearch");
+    }
+    public void hideSearch(ActiveXComponent S4App){
+        Dispatch.call(S4App,"HideSearch");
+    }
+    public void selectArticlesBySectID(ActiveXComponent S4App,long sectId,long locateOnArticle){
+        Dispatch.call(S4App,"SelectArticlesBySectID",sectId,locateOnArticle);
+    }
+    public void selectArticlesSample(ActiveXComponent S4App,long artKind,String sampleName,String SQLText,String orderBy){
+        Dispatch.call(S4App,"SelectArticlesSample",artKind,sampleName,SQLText,orderBy);
+    }
+    public int getSelectedArticleID(ActiveXComponent S4App,long num){
+        return Dispatch.call(S4App,"GetSelectedArticleID",num).getInt();
+    }
+    public boolean getImageFromScanner(ActiveXComponent S4App,String fileName,long imagesToScan,long colorFormat,long resolution,long paperSize,boolean selectSource,boolean enableADF,boolean duplex,boolean showForm){
+        return Dispatch.call(S4App,"GetImageFromScanner",fileName,imagesToScan,colorFormat,resolution,paperSize,selectSource,enableADF,duplex,showForm).getBoolean();
+    }
 }

@@ -61,15 +61,21 @@ public class OptionsController implements Initializable{
     @FXML
     private TableColumn<InputMask,String> tableColumnMask;
     @FXML
+    private TableColumn<InputMask,Number> tableColNumberInputMask;
+    @FXML
     private TableView<DocTypes> tableViewDocTypes;
     @FXML
     private TableColumn<DocTypes,String> tableColumnDocName;
     @FXML
     private TableColumn<DocTypes,String> tableColumnDtCode;
     @FXML
+    private TableColumn<DocTypes,Number> tableColNumberDocTypes;
+    @FXML
     private TableView<Formats> tableViewFormats;
     @FXML
     private TableColumn<Formats,String> tableColumnFormats;
+    @FXML
+    private TableColumn<Formats,Number> tableColNumberFormats;
     @FXML
     private TextField textFieldFormats;
     @FXML
@@ -177,7 +183,7 @@ public class OptionsController implements Initializable{
     /**Заполнения таблицы Маски по нажатию кнопки "Добавить"*/
     public void addInputMask(){
         final String text= comboBoxMask.getSelectionModel().getSelectedItem();
-        if (!text.isEmpty() && !checkTableViewInputMask(text)) tableViewInputMask.getItems().add(new InputMask(text));
+        if (!text.isEmpty() && !checkTableView(text,tableViewInputMask)) tableViewInputMask.getItems().add(new InputMask(text));
     }
     /**Выбор архива из Search*/
     public void addArchiveButton(){
@@ -213,7 +219,7 @@ public class OptionsController implements Initializable{
      */
     public void addDocTypeButton(){
         final String temp=comboBoxScanKDTypeDoc.getSelectionModel().getSelectedItem();
-        if (!checkTableViewDocTypes(temp)) {
+        if (!checkTableView(temp,tableViewDocTypes)) {
             S4App.openQuery(S4App,"select dt_code from doctypes where doc_name=\"" + temp + "\"");
             tableViewDocTypes.getItems().add(new DocTypes(temp, S4App.queryFieldByName(S4App,"dt_code")));
             S4App.closeQuery(S4App);
@@ -222,42 +228,26 @@ public class OptionsController implements Initializable{
     /**Заполнение таблицы Форматы по нажатию кнопки "Добавить"*/
     public void addFormatsButton(){
         final String temp=textFieldFormats.getText();
-        if (!checkTableViewFormats(temp) && !temp.equals("")) {
+        if (!checkTableView(temp,tableViewFormats) && !temp.equals("")) {
             tableViewFormats.getItems().add(new Formats(temp));
         }
     }
-    /**Проверяю на дубли таблицу форматов*/
-    public boolean checkTableViewFormats(String str){
+
+    /**Проверяю на дубли таблицы масок,наименований и типов документов и форматов*/
+    private boolean checkTableView(String str,TableView table){
         boolean flag=false;
-        for (Formats formats :tableViewFormats.getItems()) {
-            if (formats.getFormat().equalsIgnoreCase(str)) {
-                flag = true;
+        for (Object object :table.getItems()) {
+            if (object instanceof DocTypes){
+                flag=((DocTypes) object).getDocName().equalsIgnoreCase(str)?true:false;
+            }
+            if (object instanceof InputMask){
+                flag=((InputMask) object).getMask().equalsIgnoreCase(str)?true:false;
+            }
+            if (object instanceof  Formats){
+                flag=((Formats) object).getFormat().equalsIgnoreCase(str)?true:false;
             }
         }
-        if (flag) return true;
-        else return false;
-    }
-    /**Проверяю на дубли таблицу наименований и типов документов*/
-    public boolean checkTableViewDocTypes(String str){
-        boolean flag=false;
-        for (DocTypes types :tableViewDocTypes.getItems()) {
-            if (types.getDocName().equalsIgnoreCase(str)) {
-                flag = true;
-            }
-        }
-        if (flag) return true;
-        else return false;
-    }
-    /**Проверяю на дубли таблицу масок*/
-    public boolean checkTableViewInputMask(String str){
-        boolean flag=false;
-        for (InputMask inputMask :tableViewInputMask.getItems()) {
-            if (inputMask.getMask().equalsIgnoreCase(str)) {
-                flag = true;
-            }
-        }
-        if (flag) return true;
-        else return false;
+        return flag;
     }
     /**Удаление из таблицы типов документов строки при нажатии на кнопку "Удалить строку документов"*/
     public void deleteDocTypeButton(){
@@ -273,32 +263,16 @@ public class OptionsController implements Initializable{
             tableViewFormats.refresh();
         }
     }
-    /**Инициализация столбца "№" таблицы InputMask*/
-    public void initTableColumnNumberMask(){
-       TableColumn<InputMask,Number> tableColumnNumber= new TableColumn<>("№");
-       tableColumnNumber.setSortable(false);
-       tableColumnNumber.setMaxWidth(30);
-       tableColumnNumber.setMinWidth(25);
-       tableColumnNumber.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewInputMask.getItems().indexOf(param.getValue())));
-       tableViewInputMask.getColumns().add(0,tableColumnNumber);
-    }
-    /**Инициализация столбца "№" таблицы Formats*/
-    public void initTableColumnNumberFormats(){
-        TableColumn<Formats,Number> tableColumnNumberFormats= new TableColumn<>("№");
-        tableColumnNumberFormats.setSortable(false);
-        tableColumnNumberFormats.setMaxWidth(30);
-        tableColumnNumberFormats.setMinWidth(25);
-        tableColumnNumberFormats.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewFormats.getItems().indexOf(param.getValue())));
-        tableViewFormats.getColumns().add(0,tableColumnNumberFormats);
-    }
+
     /**Устанавливаю тип и значение,которое должно хранится в колонке,а также заполняю comboBoxMask масками*/
-    public void initTableColumns(){
+    private void initTableColumns(){
+        tableColNumberDocTypes.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewDocTypes.getItems().indexOf(param.getValue())+1));
         tableColumnDocName.setCellValueFactory(new PropertyValueFactory<>("docName"));
         tableColumnDtCode.setCellValueFactory(new PropertyValueFactory<>("dtCode"));
+        tableColNumberInputMask.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewInputMask.getItems().indexOf(param.getValue())+1));
         tableColumnMask.setCellValueFactory(new PropertyValueFactory<>("mask"));
         tableColumnFormats.setCellValueFactory(new PropertyValueFactory<>("format"));
-        initTableColumnNumberMask();
-        initTableColumnNumberFormats();
+        tableColNumberFormats.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewFormats.getItems().indexOf(param.getValue())+1));
         comboBoxMask.getItems().addAll(listMask);
         comboBoxMask.getSelectionModel().select(0);
         containTableViewFormats();//Первичная и единственная инициализация таблицы форматов
