@@ -30,15 +30,15 @@
                               <HBox prefHeight="25.0" prefWidth="600.0">
                                  <children>
                                     <Label prefHeight="25.0" prefWidth="121.0" text="Папка сканирования:" />
-                                    <TextField fx:id="textFieldFolderScan" prefWidth="200.0" />
-                                    <Button mnemonicParsing="false" onAction="#openFolderScanButton" text="..." />
+                                    <TextField fx:id="textFieldFolderScanKd" prefWidth="200.0" />
+                                    <Button mnemonicParsing="false" onAction="#openFolderScanButtonKd" text="..." />
                                  </children>
                               </HBox>
                               <HBox prefHeight="25.0" prefWidth="600.0">
                                  <children>
                                     <Label prefHeight="25.0" prefWidth="121.0" text="Папка перемещения:" />
-                                    <TextField fx:id="textFieldFolderMove" prefWidth="200.0" />
-                                    <Button mnemonicParsing="false" onAction="#openFolderMoveButton" text="..." />
+                                    <TextField fx:id="textFieldFolderMoveKd" prefWidth="200.0" />
+                                    <Button mnemonicParsing="false" onAction="#openFolderMoveButtonKd" text="..." />
                                  </children>
                               </HBox>
                               <Separator prefHeight="6.0" prefWidth="200.0" />
@@ -118,8 +118,8 @@
                               </HBox>
                               <HBox prefHeight="63.0" prefWidth="600.0">
                                  <children>
-                                    <Button mnemonicParsing="false" onAction="#addArchiveButton" text="Выбор архива" />
-                                    <TextField fx:id="textFieldArchiveId" prefHeight="25.0" prefWidth="139.0" />
+                                    <TextField fx:id="textFieldArchiveIdKd" prefHeight="25.0" prefWidth="139.0" promptText="Айди архива" />
+                                    <Button mnemonicParsing="false" onAction="#addArchiveButtonScanKd" text="Выбор архива" />
                                  </children>
                               </HBox>
                            </children>
@@ -130,7 +130,32 @@
             </Tab>
             <Tab closable="false" text="Сканирование ТД">
               <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" />
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <VBox layoutX="2.0" layoutY="2.0" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="2.0">
+                           <children>
+                              <HBox>
+                                 <children>
+                                    <Label maxHeight="25.0" minHeight="25.0" text="Папка для сканирования:" />
+                                    <TextField fx:id="textFieldFolderScanTd" promptText="Папка сканирования" />
+                                    <Button mnemonicParsing="false" onAction="#openFolderScanButtonTd" text="..." />
+                                 </children>
+                              </HBox>
+                              <HBox layoutX="10.0" layoutY="10.0">
+                                 <children>
+                                    <TextField fx:id="textFieldArchiveIdTd" promptText="Айди архива" />
+                                    <Button mnemonicParsing="false" text="Выбор архива" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label maxHeight="25.0" minHeight="25.0" text="DPI сканера:" />
+                                    <TextField fx:id="textFieldDpiScanTd" promptText="DPI" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children></AnchorPane>
               </content>
             </Tab>
             <Tab closable="false" text="Настройка форм">

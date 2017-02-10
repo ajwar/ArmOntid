@@ -16,12 +16,7 @@
     <orderEntry type="library" name="libs" level="project" />
     <orderEntry type="library" name="libs1" level="project" />
     <orderEntry type="library" name="api" level="project" />
-    <orderEntry type="library" name="morena" level="project" />
-    <orderEntry type="library" name="morena_license" level="project" />
-    <orderEntry type="library" name="morena_windows" level="project" />
     <orderEntry type="library" name="libs2" level="project" />
     <orderEntry type="library" name="libs3" level="project" />
-    <orderEntry type="library" name="uk.co.mmscomputing.device.sane" level="project" />
-    <orderEntry type="library" name="uk.co.mmscomputing.device.twain" level="project" />
   </component>
 </module>

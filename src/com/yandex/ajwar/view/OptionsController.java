@@ -1,13 +1,9 @@
 package com.yandex.ajwar.view;
 
-import com.jacob.activeX.ActiveXComponent;
-import com.jacob.com.ComThread;
-import com.jacob.com.Dispatch;
 import com.yandex.ajwar.MainApp;
 import com.yandex.ajwar.model.DocTypes;
 import com.yandex.ajwar.model.Formats;
 import com.yandex.ajwar.model.InputMask;
-import com.yandex.ajwar.model.StringData;
 import com.yandex.ajwar.util.AlertUtilNew;
 import com.yandex.ajwar.util.S4AppUtil;
 import javafx.application.Platform;
@@ -22,7 +18,6 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,14 +29,16 @@ import java.util.prefs.Preferences;
  */
 public class OptionsController implements Initializable{
 
-    private MainApp mainApp;
     private S4AppUtil S4App= S4AppUtil.getInstance();
-    private static final Logger log=Logger.getLogger(MainApp.class);
+    private static final Logger log=Logger.getLogger(OptionsController.class);
     private Stage optionsDialogStage;
+    private MainApp mainApp;
     private Preferences preferencesScanKdAndTd=MainApp.getPreferencesScanKdAndTd();
     private Preferences preferencesTableViewDocTypes=MainApp.getPreferencesTableViewDocTypes();
     private Preferences preferencesTableViewInputMask =MainApp.getPreferencesTableViewInputMask();
     private Preferences preferencesTableViewFormats =MainApp.getPreferencesTableViewFormats();
+    private static final String SP=MainApp.getSP();
+    private static final String USER_HOME=MainApp.getUserHome();
     private static final boolean FL=false;
     private final String[] listMask={
                                     "ВИЕЛ.**.*.***.***",
@@ -79,15 +76,21 @@ public class OptionsController implements Initializable{
     @FXML
     private TextField textFieldFormats;
     @FXML
-    private TextField textFieldFolderScan;
+    private TextField textFieldFolderScanKd;
     @FXML
-    private TextField textFieldFolderMove;
+    private TextField textFieldFolderMoveKd;
+    @FXML
+    private TextField textFieldFolderScanTd;
+    @FXML
+    private TextField textFieldDpiScanTd;
     @FXML
     private ComboBox<String> comboBoxScanKDTypeDoc;
     @FXML
     private Label labelSaveNotice;
     @FXML
-    private TextField textFieldArchiveId;
+    private TextField textFieldArchiveIdKd;
+    @FXML
+    private TextField textFieldArchiveIdTd;
     @FXML
     private ComboBox<String> comboBoxMask;
     @FXML
@@ -99,6 +102,11 @@ public class OptionsController implements Initializable{
     @FXML
     private CheckBox checkBoxScanKdVersionOptions;
 
+    /**Дисэйбл формы опционс*/
+    private void disableOptios(boolean flag){
+        if (flag) executorServiceLoad.submit(()->getOptionsDialogStage().getScene().getRoot().setDisable(true));
+        else executorServiceLoad.submit(()->getOptionsDialogStage().getScene().getRoot().setDisable(false));
+    }
     /**вешаю слушателя на чекбоксы скрытия Tab'ov*/
     private void addListenerCheckBox(){
         checkBoxScanKdOptions.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -110,12 +118,12 @@ public class OptionsController implements Initializable{
     }
 
     /**Обновление формы PdfView при нажатии на кнопку сохранить*/
-    public void updatePdfViewAfterClickSave(){
+    private void updatePdfViewAfterClickSave(){
         //Cначала идет заполнение всех комбоБоксов на форме
         getMainApp().getPdfViewerController().containComboBoxDocTypes();
         getMainApp().getPdfViewerController().containComboBoxFormats();
         getMainApp().getPdfViewerController().containComboBoxMask();
-        getMainApp().getPdfViewerController().disableFormPdfView();
+        getMainApp().getPdfViewerController().hideFormPdfView();
     }
     /**Инициализация кэшированного пула потоков*/
     private void createAndConfigureExecutorsLoadService() {
@@ -146,12 +154,15 @@ public class OptionsController implements Initializable{
     }
     /**Сохранение в реестр при нажатии на кнопку "Сохранить"*/
     public void onClickMouseButtonSave(){
-        if (textFieldArchiveId.getText().isEmpty()) {
+        if (textFieldArchiveIdKd.getText().isEmpty()) {
             AlertUtilNew.message("Внимание!","Выберите архив из списка архивов Search!","Пустое поле архивы.", Alert.AlertType.WARNING);
         }else {
-            preferencesScanKdAndTd.putLong("textFieldArchiveId", Long.parseLong(textFieldArchiveId.getText()));
-            preferencesScanKdAndTd.put("textFieldFolderScan", textFieldFolderScan.getText());
-            preferencesScanKdAndTd.put("textFieldFolderMove", textFieldFolderMove.getText());
+            preferencesScanKdAndTd.putLong("textFieldArchiveIdKd", Long.parseLong(textFieldArchiveIdKd.getText()));
+            preferencesScanKdAndTd.putLong("textFieldArchiveIdTd", Long.parseLong(textFieldArchiveIdTd.getText()));
+            preferencesScanKdAndTd.putLong("textFieldDpiScanTd", Integer.parseInt(textFieldDpiScanTd.getText()));
+            preferencesScanKdAndTd.put("textFieldFolderScanKd", textFieldFolderScanKd.getText());
+            preferencesScanKdAndTd.put("textFieldFolderScanTd", textFieldFolderScanTd.getText());
+            preferencesScanKdAndTd.put("textFieldFolderMoveKd", textFieldFolderMoveKd.getText());
             preferencesScanKdAndTd.putBoolean("checkBoxScanKdOptions",checkBoxScanKdOptions.selectedProperty().get());
             preferencesScanKdAndTd.putBoolean("checkBoxScanKdNewOptions",checkBoxScanKdNewOptions.selectedProperty().get());
             preferencesScanKdAndTd.putBoolean("checkBoxScanKdVersionOptions",checkBoxScanKdVersionOptions.selectedProperty().get());
@@ -181,21 +192,28 @@ public class OptionsController implements Initializable{
         }
     }
     /**Заполнения таблицы Маски по нажатию кнопки "Добавить"*/
+    @FXML
     public void addInputMask(){
         final String text= comboBoxMask.getSelectionModel().getSelectedItem();
         if (!text.isEmpty() && !checkTableView(text,tableViewInputMask)) tableViewInputMask.getItems().add(new InputMask(text));
     }
-    /**Выбор архива из Search*/
-    public void addArchiveButton(){
-        textFieldArchiveId.setText(String.valueOf(S4App.chooseArchiveName(S4App)));
-    }
-    /**Удаление из таблицы Маски строки при нажатии на кнопку "Удалить маску"*/
-    public void deleteMaskButton(){
-        if (tableViewInputMask.getSelectionModel().getSelectedItem()!=null) {
-            tableViewInputMask.getItems().remove(tableViewInputMask.getSelectionModel().getSelectedItem());
-            tableViewInputMask.refresh();
+    /**Выбор архива из Search для сканированной документации*/
+    @FXML
+    private void addArchiveButtonScanKd(){
+        disableOptios(true);
+        try {
+            S4App.hideSearch(S4App);
+            S4App.showSearch(S4App);
+            addArchiveButton(textFieldArchiveIdKd);
+        } finally {
+            disableOptios(false);
         }
     }
+    /**Выбор архива из Search*/
+    public void addArchiveButton(TextField textField){
+        textField.setText(String.valueOf(S4App.chooseArchiveName(S4App)));
+    }
+
     /**Заполнение выпадающего списка,где можно выбирать типы документов*/
     public void containComboBoxScanKDTypeDoc(){
         //открываю новый поток Jacob и создаю новый объект Серча
@@ -217,6 +235,7 @@ public class OptionsController implements Initializable{
     /**
      * Заполнение таблицы Типы документов по нажатию кнопки "Добавить"
      */
+    @FXML
     public void addDocTypeButton(){
         final String temp=comboBoxScanKDTypeDoc.getSelectionModel().getSelectedItem();
         if (!checkTableView(temp,tableViewDocTypes)) {
@@ -226,6 +245,7 @@ public class OptionsController implements Initializable{
         }
     }
     /**Заполнение таблицы Форматы по нажатию кнопки "Добавить"*/
+    @FXML
     public void addFormatsButton(){
         final String temp=textFieldFormats.getText();
         if (!checkTableView(temp,tableViewFormats) && !temp.equals("")) {
@@ -249,18 +269,26 @@ public class OptionsController implements Initializable{
         }
         return flag;
     }
+    /**Удаление из таблицы Маски строки при нажатии на кнопку "Удалить маску"*/
+    @FXML
+    public void deleteMaskButton(){
+        deleteRowsInTable(tableViewInputMask);
+    }
     /**Удаление из таблицы типов документов строки при нажатии на кнопку "Удалить строку документов"*/
+    @FXML
     public void deleteDocTypeButton(){
-        if (tableViewDocTypes.getSelectionModel().getSelectedItem()!=null) {
-            tableViewDocTypes.getItems().remove(tableViewDocTypes.getSelectionModel().getSelectedItem());
-            tableViewDocTypes.refresh();
-        }
+        deleteRowsInTable(tableViewDocTypes);
     }
     /**Удаление из таблицы типов документов строки при нажатии на кнопку "Удалить строку форматов"*/
+    @FXML
     public void deleteFormatsButton(){
-        if (tableViewFormats.getSelectionModel().getSelectedItem()!=null) {
-            tableViewFormats.getItems().remove(tableViewFormats.getSelectionModel().getSelectedItem());
-            tableViewFormats.refresh();
+        deleteRowsInTable(tableViewFormats);
+    }
+    /**Удаление любой выделенной строки из любой таблицы*/
+    public static void deleteRowsInTable(TableView table){
+        if (table.getSelectionModel().getSelectedItem()!=null) {
+            table.getItems().remove(table.getSelectionModel().getSelectedItem());
+            table.refresh();
         }
     }
 
@@ -280,9 +308,12 @@ public class OptionsController implements Initializable{
 
     /**Чтение данных из реестра,для задания значений в форме Options(TextField and e.g. )*/
     private void loadBaseOptions(){
-        getTextFieldArchiveId().setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldArchiveId",323)));
-        getTextFieldFolderMove().setText(preferencesScanKdAndTd.get("textFieldFolderMove",System.getProperty("user.home")));
-        getTextFieldFolderScan().setText(preferencesScanKdAndTd.get("textFieldFolderScan", System.getProperty("user.home")));
+        getTextFieldArchiveIdKd().setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldArchiveIdKd",323)));
+        getTextFieldArchiveIdTd().setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldArchiveIdTd",323)));
+        getTextFieldDpiScanTd().setText(String.valueOf(preferencesScanKdAndTd.getInt("textFieldDpiScanTd",450 )));
+        getTextFieldFolderMoveKd().setText(preferencesScanKdAndTd.get("textFieldFolderMoveKd",USER_HOME));
+        getTextFieldFolderScanKd().setText(preferencesScanKdAndTd.get("textFieldFolderScanKd", USER_HOME));
+        getTextFieldFolderScanTd().setText(preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME));
         checkBoxScanKdOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanKdOptions",true));
         checkBoxScanKdNewOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanKdNewOptions",true));
         checkBoxScanKdVersionOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanKdVersionOptions",true));
@@ -306,23 +337,27 @@ public class OptionsController implements Initializable{
         }
     }
 
-    /**При нажатии на кнопку,выбирается папка сканирования*/
-    public void openFolderScanButton(){
+    public void clickButtonChooserDirectory(TextField textField,String textTitle){
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Выберите папку,в которую ложатся сканированные файлы.");
-        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        directoryChooser.setTitle(textTitle);
+        directoryChooser.setInitialDirectory(new File(USER_HOME));
         File file = directoryChooser.showDialog(getMainApp().getPrimaryStage());
-        if (file == null) textFieldFolderScan.setText(System.getProperty("user.home"));
-        else textFieldFolderScan.setText(file.getAbsolutePath());
+        if (file == null) textField.setText(USER_HOME);
+        else textField.setText(file.getAbsolutePath());
+    }
+    /**При нажатии на кнопку,выбирается папка сканирования*/
+    @FXML
+    private void openFolderScanButtonKd(){
+        clickButtonChooserDirectory(textFieldFolderScanKd,"Выберите папку,в которую ложатся сканированные файлы.");
     }
     /**При нажатии на кнопку,выбирается папка перемещения доков,после сканирования*/
-    public void openFolderMoveButton(){
-        DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Выберите папку,в которую будут перемещены сканированные файлы.");
-        directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        File file = directoryChooser.showDialog(getMainApp().getPrimaryStage());
-        if (file == null) textFieldFolderMove.setText(System.getProperty("user.home"));
-        else textFieldFolderMove.setText(file.getAbsolutePath());
+    @FXML
+    private void openFolderMoveButtonKd(){
+        clickButtonChooserDirectory(textFieldFolderMoveKd,"Выберите папку,в которую будут перемещены сканированные файлы.");
+    }
+    @FXML
+    private void openFolderScanButtonTd(){
+        clickButtonChooserDirectory(textFieldFolderScanTd,"Выберите папку,в которую ложатся сканированные файлы.");
     }
 
 
@@ -341,24 +376,48 @@ public class OptionsController implements Initializable{
         this.optionsDialogStage = optionsDialogStage;
     }
 
-    public TextField getTextFieldFolderScan() {
-        return textFieldFolderScan;
+    public TextField getTextFieldFolderScanKd() {
+        return textFieldFolderScanKd;
     }
 
-    public TextField getTextFieldFolderMove() {
-        return textFieldFolderMove;
+    public TextField getTextFieldFolderMoveKd() {
+        return textFieldFolderMoveKd;
     }
 
     public TableView<DocTypes> getTableViewDocTypes() {
         return tableViewDocTypes;
     }
 
-    public TextField getTextFieldArchiveId() {
-        return textFieldArchiveId;
+    public TextField getTextFieldArchiveIdKd() {
+        return textFieldArchiveIdKd;
     }
 
-    public void setTextFieldArchiveId(TextField textFieldArchiveId) {
-        this.textFieldArchiveId = textFieldArchiveId;
+    public void setTextFieldArchiveIdKd(TextField textFieldArchiveIdKd) {
+        this.textFieldArchiveIdKd = textFieldArchiveIdKd;
+    }
+
+    public TextField getTextFieldFolderScanTd() {
+        return textFieldFolderScanTd;
+    }
+
+    public void setTextFieldFolderScanTd(TextField textFieldFolderScanTd) {
+        this.textFieldFolderScanTd = textFieldFolderScanTd;
+    }
+
+    public TextField getTextFieldArchiveIdTd() {
+        return textFieldArchiveIdTd;
+    }
+
+    public void setTextFieldArchiveIdTd(TextField textFieldArchiveIdTd) {
+        this.textFieldArchiveIdTd = textFieldArchiveIdTd;
+    }
+
+    public TextField getTextFieldDpiScanTd() {
+        return textFieldDpiScanTd;
+    }
+
+    public void setTextFieldDpiScanTd(TextField textFieldDpiScanTd) {
+        this.textFieldDpiScanTd = textFieldDpiScanTd;
     }
 
     @Override

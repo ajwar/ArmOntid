@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
 
 public class MainWindowController implements Initializable {
     private MainApp mainApp;
-    private static final Logger log=Logger.getLogger(MainApp.class);
+    private static final Logger log=Logger.getLogger(MainWindowController.class);
     private S4AppUtil S4App = S4AppUtil.getInstance();
     private static final String LOGIN = "ajwar";
     private static final String PASSWORD = "ra0843766";

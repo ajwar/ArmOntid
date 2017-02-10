@@ -3,6 +3,7 @@ package com.yandex.ajwar;
 
 import com.yandex.ajwar.model.StringData;
 import com.yandex.ajwar.util.S4AppUtil;
+import com.yandex.ajwar.view.ImbaseTreeController;
 import com.yandex.ajwar.view.MainWindowController;
 import com.yandex.ajwar.view.OptionsController;
 import com.yandex.ajwar.view.PdfViewerController;
@@ -31,12 +32,15 @@ public class MainApp extends Application {
     private static Preferences preferencesTableViewDocTypes = preferencesScanKdAndTd.node("tableViewDocTypes");
     private static Preferences preferencesTableViewInputMask = preferencesScanKdAndTd.node("tableViewInputMask");
     private static Preferences preferencesTableViewFormats = preferencesScanKdAndTd.node("tableViewFormats");
+    private static final String SP=System.getProperty("file.separator","\\");
+    private static final String USER_HOME=System.getProperty("user.home","d:\\");
     private Stage primaryStage;
 
     private BorderPane mainBorderPane;
     private PdfViewerController pdfViewerController;
     private OptionsController optionsController;
     private MainWindowController mainWindowController;
+    private ImbaseTreeController imbaseTreeController;
     private ObservableList<StringData> stringNameFileData = FXCollections.observableArrayList();
 
     @Override
@@ -47,6 +51,7 @@ public class MainApp extends Application {
         initMainWindow();
         showRightWindow();
         primaryStage.show();
+        //getPrimaryStage().toBack();
     }
 
 
@@ -63,9 +68,9 @@ public class MainApp extends Application {
                 .getCodeSource().getLocation()
                 .toURI().getPath()
                 .replace('/', File.separator.charAt(0)).substring(1);*/
-        //если память кучи меньше 1gb,то перезапускаю программу с нач. 512 мб и конечной 1гб памятью
+        //если память кучи меньше 1gb,то перезапускаю программу с нач. 512 мб и конечной 2гб памятью
         if(args.length==0 && Runtime.getRuntime().maxMemory()/1024/1024<980) {
-            Runtime.getRuntime().exec("java -jar -Xms512m -Xmx1024m -Dcom.jacob.autogc=TRUE "+currentPath+" restart");
+            Runtime.getRuntime().exec("java -jar -Xms512m -Xmx2048m -Dcom.jacob.autogc=TRUE "+currentPath+" restart");
             return;
         }
         launch(args);
@@ -129,9 +134,33 @@ public class MainApp extends Application {
             getOptionsController().setOptionsDialogStage(stageOptions);
             stageOptions.sizeToScene();
             stageOptions.setResizable(false);
-            stageOptions.hide();
+            //stageOptions.hide();
         } catch (IOException e) {
             log.error("Ошибка при загрузке формы настроек (Options.fxml).",e);
+            e.printStackTrace();
+        }
+    }
+
+    public void showImbaseTree() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/ImbaseTree.fxml"));
+            AnchorPane paneImbase = (AnchorPane) loader.load();
+            Stage stageImbase = new Stage();
+            stageImbase.setTitle("Маршрут изготовления.");
+            stageImbase.initModality(Modality.WINDOW_MODAL);
+            stageImbase.initOwner(primaryStage);
+            Scene scene = new Scene(paneImbase);
+            stageImbase.setScene(scene);
+            setImbaseTreeController(loader.getController());
+            getImbaseTreeController().setMainApp(this);
+            getImbaseTreeController().setImbaseDialogStage(stageImbase);
+            //stageImbase.sizeToScene();
+            stageImbase.initStyle(StageStyle.UNDECORATED);
+
+            //stageImbase.setResizable(false);
+        } catch (IOException e) {
+            log.error("Ошибка при загрузке формы настроек (ImbaseTree.fxml).", e);
             e.printStackTrace();
         }
     }
@@ -219,5 +248,21 @@ public class MainApp extends Application {
 
     public void setMainWindowController(MainWindowController mainWindowController) {
         this.mainWindowController = mainWindowController;
+    }
+
+    public static String getSP() {
+        return SP;
+    }
+
+    public static String getUserHome() {
+        return USER_HOME;
+    }
+
+    public ImbaseTreeController getImbaseTreeController() {
+        return imbaseTreeController;
+    }
+
+    public void setImbaseTreeController(ImbaseTreeController imbaseTreeController) {
+        this.imbaseTreeController = imbaseTreeController;
     }
 }

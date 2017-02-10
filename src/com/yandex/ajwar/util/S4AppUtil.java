@@ -47,6 +47,15 @@ public class S4AppUtil extends ActiveXComponent{
     public String getErrorMessage(ActiveXComponent S4App) {
         return S4App.getPropertyAsString("ErrorMessage");
     }
+    public void setQuietMode(ActiveXComponent S4App,int value){
+        S4App.setProperty("QuietMode",value);
+    }
+    public void setErrorCode(ActiveXComponent S4App,int value) {
+        S4App.setProperty("ErrorCode",value);
+    }
+    public void setErrorMessage(ActiveXComponent S4App,String message) {
+        S4App.setProperty("ErrorMessage",message);
+    }
 
     //дополнительные функции и процедуры
     public static S4AppUtil returnAndCreateThreadS4App(){
@@ -60,6 +69,9 @@ public class S4AppUtil extends ActiveXComponent{
         ComThread.quitMainSTA();
     }
     //Функции и процедуры Search
+    public int getUserID(ActiveXComponent S4App){
+        return Dispatch.call(S4App,"GetUserID").getInt();
+    }
     public void openArticle(ActiveXComponent S4App,long artId){
         Dispatch.call(S4App,"OpenArticle",artId);
     }

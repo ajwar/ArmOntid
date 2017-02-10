@@ -421,7 +421,7 @@
                                  </HBox.margin>
                                  <children>
                                     <Button minHeight="35.0" mnemonicParsing="false" onAction="#clickButtonSelectInSearchObject" text="Выбрать из Search" />
-                                    <Button layoutX="10.0" layoutY="10.0" minHeight="35.0" mnemonicParsing="false" text="Удалить объект" />
+                                    <Button layoutX="10.0" layoutY="10.0" minHeight="35.0" mnemonicParsing="false" onAction="#deleteObjectTp" text="Удалить объект" />
                                  </children>
                               </VBox>
                            </children>
@@ -433,7 +433,7 @@
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                              <Button fx:id="buttonRouteMapScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanRouteMapTd" text="Сканировать" />
                            </children>
                         </HBox>
                         <HBox layoutX="10.0" layoutY="217.0" minHeight="25.0">
@@ -443,7 +443,7 @@
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                              <Button fx:id="buttonSetMapScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanSetMapTd" text="Сканировать" />
                            </children>
                         </HBox>
                         <HBox layoutX="10.0" layoutY="249.0" minHeight="25.0">
@@ -453,7 +453,7 @@
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                              <Button fx:id="buttonSheetMaterialScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanSheetMaterialTd" text="Сканировать" />
                            </children>
                         </HBox>
                         <HBox layoutX="10.0" layoutY="281.0" minHeight="25.0">
@@ -463,7 +463,7 @@
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                              <Button fx:id="buttonOperationMapScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanOperationMapTd" text="Сканировать" />
                            </children>
                         </HBox>
                         <HBox layoutX="10.0" layoutY="313.0" minHeight="25.0">
@@ -481,7 +481,7 @@
                                  </HBox.margin>
                                  <children>
                                     <Button minHeight="30.0" mnemonicParsing="false" onAction="#addMapSketch" text="Добавить карту эскизов" />
-                                    <Button maxHeight="25.0" minHeight="30.0" mnemonicParsing="false" text="Удалить карту эскизов" />
+                                    <Button maxHeight="25.0" minHeight="30.0" mnemonicParsing="false" onAction="#deleteMapSketchTd" text="Удалить карту эскизов" />
                                  </children>
                               </VBox>
                            </children>
@@ -497,7 +497,7 @@
                               <VBox spacing="15.0">
                                  <children>
                                     <Button minHeight="30.0" mnemonicParsing="false" onAction="#addNumberSheet" text="Добавить ведомость" />
-                                    <Button minHeight="30.0" mnemonicParsing="false" text="Удалить ведомость" />
+                                    <Button minHeight="30.0" mnemonicParsing="false" onAction="#deleteNumberSheet" text="Удалить ведомость" />
                                  </children>
                                  <HBox.margin>
                                     <Insets left="25.0" />
@@ -509,7 +509,7 @@
                            <children>
                               <Label minHeight="25.0" minWidth="200.0" text="Маршрут изготовления" />
                               <TextField minHeight="25.0" />
-                              <Button minHeight="25.0" mnemonicParsing="false" text="Сканировать" />
+                              <Button minHeight="25.0" mnemonicParsing="false" onAction="#handleImbaseTreeForm" text="Выбор цехов и участков" />
                            </children>
                         </HBox>
                         <HBox layoutX="10.0" layoutY="409.0" minHeight="25.0">
