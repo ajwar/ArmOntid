@@ -1,5 +1,11 @@
 package com.yandex.ajwar.view;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.RandomAccessFileOrArray;
+import com.itextpdf.text.pdf.codec.TiffImage;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import com.yandex.ajwar.MainApp;
@@ -10,13 +16,15 @@ import com.yandex.ajwar.util.S4AppUtil;
 import com.yandex.ajwar.util.TextFormatterUtil;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.IntegerBinding;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -30,7 +38,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -41,6 +51,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URL;
@@ -50,8 +61,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -82,10 +93,19 @@ public class PdfViewerController implements Initializable {
     private static final String TOOLTIP_STR_FORMAT_TD ="Допускается ввод только по маске \"В25.*****.*****\"";
     private static final String SP=MainApp.getSP();
     private static final String USER_HOME=MainApp.getUserHome();
+    private static final String SELECT_SQL_IN_OBJECT="((#Тип объекта# = 3) OR (#Тип объекта# = 4)) AND (#Обозначение# <> '')";
+    private static List<Long> listDocIdScan=new ArrayList<>();
     //private static final String HOME_PATH_SCAN="";
     //private final String FULL_PATH_FILE ="\\AppData\\Local\\Temp\\_IMS\\";
     private static final byte SECTION_ID = 1; //Раздел документация(столбец SECTION_ID) в таблице SSECTION
-    private static final byte SECTION_ID_DETAIL=4;
+    //private static final byte SECTION_ID_DETAIL=4;
+    private final String[] arrayBuroOgt={
+            "БШ",
+            "БМО",
+            "БСиТО",
+            "БСУ",
+            "БПП",
+            "ГрТиС"};
 
     @FXML
     private Pagination pagination;
@@ -104,6 +124,12 @@ public class PdfViewerController implements Initializable {
     @FXML
     private TableView<MapSketch> tableViewMapSketchTd;
     @FXML
+    private TableColumn<MapSketch,TextField> tableColTextFieldOtdRegNumMapSketch;
+    @FXML
+    private TableColumn<MapSketch,TextField> tableColTextFieldDesignIIMapSketch;
+    @FXML
+    private TableColumn<MapSketch,TextField> tableColTextFieldNumChangeMapSketch;
+    @FXML
     private TableColumn<MapSketch,TextField> tableColTextFieldMapSketch;
     @FXML
     private TableColumn<MapSketch,Button> tableColButtonMapSketch;
@@ -117,6 +143,8 @@ public class PdfViewerController implements Initializable {
     private TableColumn<ObjectTp,String> tableColNameObjectTp;
     @FXML
     private TableColumn<ObjectTp,Number> tableColNumberObjectTp;
+    @FXML
+    private TableColumn<ObjectTp,Integer> tableColArtIdObjectTp;
     @FXML
     private TableView<NumberSheet> tableViewNumberSheet;
     @FXML
@@ -148,21 +176,47 @@ public class PdfViewerController implements Initializable {
     @FXML
     private ComboBox<String> comboBoxFormatPdfViewController;
     @FXML
+    private ComboBox<String> comboBoxBuroOgtTd;
+    @FXML
     private TextField textFieldDesignation;
     @FXML
     private TextField textFieldNumberChange;
     @FXML
     private TextField textFieldDopNumberPdfView;
     @FXML
-    private TextField textFieldPathMapTd;
+    private TextField textFieldDesignPathMapTd;
     @FXML
-    private TextField textFieldSetMapTd;
+    private TextField textFieldOtdRegNumPathMapTd;
     @FXML
-    private TextField textFieldSheetMaterialTd;
+    private TextField textFieldNumChangePathMapTd;
     @FXML
-    private TextField textFieldOperationMapTd;
+    private TextField textFieldDesignationIIPathMapTd;
     @FXML
-    private TextField textFieldNumberIITd;
+    private TextField textFieldDesignSetMapTd;
+    @FXML
+    private TextField textFieldOtdRegNumSetMapTd;
+    @FXML
+    private TextField textFieldNumChangeSetMapTd;
+    @FXML
+    private TextField textFieldDesignationIISetMapTd;
+    @FXML
+    private TextField textFieldDesignSheetMaterialTd;
+    @FXML
+    private TextField textFieldOtdRegNumSheetMaterialTd;
+    @FXML
+    private TextField textFieldNumChangeSheetMaterialTd;
+    @FXML
+    private TextField textFieldDesignationIISheetMaterialTd;
+    @FXML
+    private TextField textFieldDesignOperationMapTd;
+    @FXML
+    private TextField textFieldOtdRegNumOperationMapTd;
+    @FXML
+    private TextField textFieldNumChangeOperationMapTd;
+    @FXML
+    private TextField textFieldDesignationIIOperationMapTd;
+    @FXML
+    private TextField textFieldRouteCeh;
     @FXML
     private TextArea textAreaName;
     @FXML
@@ -175,6 +229,8 @@ public class PdfViewerController implements Initializable {
     private CheckBox checkBoxRegOtdVersion;
     @FXML
     private CheckBox checkBoxNoteVersion;
+    @FXML
+    private CheckBox checkBoxBuroOgtTd;
     @FXML
     private Button buttonExportInSearch;
     @FXML
@@ -193,6 +249,8 @@ public class PdfViewerController implements Initializable {
     private Button buttonSheetMaterialScanTd;
     @FXML
     private Button buttonOperationMapScanTd;
+    @FXML
+    private Button buttonExportInSearchTp;
     @FXML
     private ContextMenu contextMenuPaginationPdfView;
     @FXML
@@ -214,22 +272,37 @@ public class PdfViewerController implements Initializable {
     private void disableMainWindow(boolean flag) {
         Platform.runLater(()->getMainApp().getPrimaryStage().getScene().getRoot().setDisable(flag));
     }
-
+    /**
+     * Блокировка кнопок по событиям
+     */
+    private void disableButton(boolean flag) {
+        buttonExportInSearch.setDisable(flag);
+        buttonAddVersionInSearch.setDisable(flag);
+    }
     /**
      * Возвращает обозначение документа
      */
-    private String returnDesignation(TextField field) {
-        String str;
-        S4App.openQuery(S4App,"select suffix,dt_code from doctypes where doc_name=\""+comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem()+"\"");
-        int suffix=Integer.parseInt(S4App.queryFieldByName(S4App,"suffix"));
-        String code=S4App.queryFieldByName(S4App,"dt_code");
-        S4App.closeQuery(S4App);
-        if (!textFieldDopNumberPdfView.getText().isEmpty()) str=" Дополнение №"+textFieldDopNumberPdfView.getText();
-            else str="";
-        if (suffix==0)
-                return field.getText()+str;
-            else
-                return field.getText()+str +" "+ code;
+    private String returnDesignation(S4AppUtil S4AppThread,TextField field,String docName,Long idDocType) {
+        if (idDocType==null) {//Для сканированной КД
+            String str;
+            S4AppThread.openQuery(S4AppThread,"select suffix,dt_code from doctypes where doc_name=\""+docName+"\"");
+            int suffix=Integer.parseInt(S4AppThread.queryFieldByName(S4AppThread,"suffix"));
+            String code=S4AppThread.queryFieldByName(S4AppThread,"dt_code");
+            S4AppThread.closeQuery(S4AppThread);
+            if (!textFieldDopNumberPdfView.getText().isEmpty()) str=" Дополнение №"+textFieldDopNumberPdfView.getText();
+                else str="";
+            if (suffix==0)
+                    return field.getText()+str;
+                else
+                    return field.getText()+str +" "+ code;
+        } else {//Для сканированной ТД
+            S4AppThread.openQuery(S4AppThread,"select suffix,dt_code from doctypes where doc_type=\""+idDocType+"\"");
+            int suffix=Integer.parseInt(S4AppThread.queryFieldByName(S4AppThread,"suffix"));
+            String code=S4AppThread.queryFieldByName(S4AppThread,"dt_code");
+            S4AppThread.closeQuery(S4AppThread);
+            if (suffix==0) return field.getText();
+            else return field.getText()+" "+code;
+        }
     }
 
     /**
@@ -242,24 +315,16 @@ public class PdfViewerController implements Initializable {
     }
 
     /**
-     * Формирование полного пути и копирование в рабочуюю документацию
+     * Формирование полного пути
      */
-    private String copyAndReturnFullPath(String designation, int version) {
+    private String copyAndReturnFullPath(String designation, int version,String move) {
         String path;
         if (version == 0) {
-            path = preferencesScanKdAndTd.get("textFieldFolderMove", USER_HOME) + SP + designation + " Скан.pdf";
+            path = move + SP + designation + " Скан.pdf";
         } else {
-            path = preferencesScanKdAndTd.get("textFieldFolderMove", USER_HOME) + SP + designation + " [" + version + "] Скан.pdf";
+            path = move + SP + designation + " [" + version + "] Скан.pdf";
         }
         return path;
-    }
-
-    /**
-     * Блокировка кнопок по событиям
-     */
-    private void disableButton(boolean flag) {
-        buttonExportInSearch.setDisable(flag);
-        buttonAddVersionInSearch.setDisable(flag);
     }
 
     /**Невидимость форм окна при изменении в опциях ЧекБоксов*/
@@ -286,7 +351,11 @@ public class PdfViewerController implements Initializable {
         }
 
     }
-
+    private void progressIndicatorAlways(){
+        getMainApp().showProgressIndicator();
+        getMainApp().getProgressIndicatorController().getProgressIndicator().setProgress(-1d);
+        getMainApp().getProgressIndicatorController().getProgressIndicatorStage().show();
+    }
     /**
      * Нажатие на кнопку "Экспорт в Search"
      */
@@ -294,7 +363,7 @@ public class PdfViewerController implements Initializable {
     private void exportInSearch() {
         String msg = "";
         String select=comboBoxMaskPdfViewController.getSelectionModel().getSelectedItem();
-        int versionId = 0, i = 0;
+        int  i = 0;
         if (!checkDesignationInSearchAndAddVersion(select)) msg += ++i + ")Заполните поле \"Обозначение\".\r\n";
         if (textAreaName.getText().isEmpty()) msg += ++i + ")Заполните поле \"Наименование\".\r\n";
         if (comboBoxFormatPdfViewController.getSelectionModel().getSelectedItem().isEmpty())
@@ -305,14 +374,22 @@ public class PdfViewerController implements Initializable {
             AlertUtilNew.message("Проверка полей.", msg, "Не заполнены следующие поля:", Alert.AlertType.WARNING);
         else {
             disableMainWindow(true);
+            progressIndicatorAlways();
+            executorServiceLoad.submit(this::exportInSearchAdapter);
+        }
+    }
+    private void exportInSearchAdapter(){
+        int id=-1,versionId = 0;
+        try {
+            S4AppUtil S4AppThread = S4AppUtil.returnAndCreateThreadS4App();
             //Проверяю код документа и формирую полное обозначение
-            String designation = returnDesignation(textFieldDesignation);
+            String designation = returnDesignation(S4AppThread,textFieldDesignation,comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(),null);
             //Полный путь к файлу
-            String path = copyAndReturnFullPath(designation, versionId);
+            String path = copyAndReturnFullPath(designation, versionId,preferencesScanKdAndTd.get("textFieldFolderMove", USER_HOME));
             //нахожу Айди типа документа из базы Серча
-            S4App.openQuery(S4App,"select doc_type from doctypes where doc_name=\"" + comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem() + "\"");
-            long docType = Long.parseLong(S4App.queryFieldByName(S4App,"doc_type"));
-            S4App.closeQuery(S4App);
+            S4AppThread.openQuery(S4AppThread,"select doc_type from doctypes where doc_name=\"" + comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem() + "\"");
+            long docType = Long.parseLong(S4AppThread.queryFieldByName(S4AppThread,"doc_type"));
+            S4AppThread.closeQuery(S4AppThread);
             //присваиваю номер архива в переменную
             long archive = preferencesScanKdAndTd.getLong("textFieldArchiveIdKd", 323);
             String fullFileName=preferencesScanKdAndTd.get("textFieldFolderScanKd", USER_HOME) + SP +listFileTable.getSelectionModel().getSelectedItem().getNameFile();
@@ -322,31 +399,35 @@ public class PdfViewerController implements Initializable {
                 log.error("Ошибка при копировании файла.",e);
                 e.printStackTrace();
             }
-            long id = S4App.createFileDocumentWithDocType(S4App,path, docType, archive, designation, textAreaName.getText(), SECTION_ID);//создаю документ
+            id= S4AppThread.createFileDocumentWithDocType(S4AppThread,path, docType, archive, designation, textAreaName.getText(), SECTION_ID);//создаю документ
             if (id > 0) {
-                S4App.openDocVersion(S4App,id, 0);
-                try {
-                    S4App.setFieldValue(S4App,"Формат", comboBoxFormatPdfViewController.getSelectionModel().getSelectedItem());
-                    S4App.setFieldValue(S4App,"Кол-во листов", labelNumberOfSheets.getText());
-                } catch (Exception e) {
-                    log.error("Ошибка при добавлении в файл в Search параметров формат и кол-во листов.Файл с айди="+id,e);
-                    e.printStackTrace();
-                }
+                S4AppThread.openDocVersion(S4AppThread,id, 0);
+                S4AppThread.setFieldValue(S4AppThread,"Формат", comboBoxFormatPdfViewController.getSelectionModel().getSelectedItem());
+                S4AppThread.setFieldValue(S4AppThread,"Кол-во листов", labelNumberOfSheets.getText());
                 if (checkBoxRegOtd.isSelected()) {
-                    S4App.setFieldValue_DocVersion(S4App,"OTD_STATUS", "1");//присваиваю статус ОТД зарегистрирован
-                    S4App.setFieldValue_DocVersion(S4App,"OTD_REG", DateUtil.parseDateToString(datePickerOtdNew.getValue()));//дату регистрации беру из DatePicker
+                    S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_STATUS", "1");//присваиваю статус ОТД зарегистрирован
+                    S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_REG", DateUtil.parseDateToString(datePickerOtdNew.getValue()));//дату регистрации беру из DatePicker
                 }
-                //S4App.saveChanges();
-                S4App.checkIn(S4App);//возвращаю файл в архив
-                S4App.closeDocument(S4App);//
-                AlertUtilNew.message("Удачная регистрация.", "Айди документа=" + id, "Сканированный документ занесен в архив.", Alert.AlertType.INFORMATION);
+                //S4AppThread.saveChanges();
+                S4AppThread.checkIn(S4AppThread);//возвращаю файл в архив
+                S4AppThread.closeDocument(S4AppThread);//
+                final int idAdapter=id;
+                Platform.runLater(()->AlertUtilNew.message("Удачная регистрация.", "Айди документа=" + idAdapter,
+                        "Сканированный документ занесен в архив.", Alert.AlertType.INFORMATION));
                 new File(fullFileName).delete(); //удаляю файл после удачной регистрации
-                updateTableView();//обновляю файлы в списке
+                Platform.runLater(this::updateTableView);//updateTableView();//обновляю файлы в списке
                 disableButton(true);//Запрещаю нажатие на кнопку
             } else {
-                AlertUtilNew.message("Неудачная регистрация.", "Обратитесь к любому администратору Search по телефонам 22-35,23-49 или 22-06", "Произошла непредвиденная ошибка.", Alert.AlertType.ERROR);
+                Platform.runLater(()->AlertUtilNew.message("Неудачная регистрация.", "Обратитесь к любому администратору Search " +
+                            "по телефонам 22-35,23-49 или 22-06", "Произошла непредвиденная ошибка.", Alert.AlertType.ERROR));
             }
+        }catch (Exception e){
+            log.error("Ошибка при добавлении файла в Search c айди="+id,e);
+            e.printStackTrace();
+        }finally{
             disableMainWindow(false);
+            Platform.runLater(()->getMainApp().getProgressIndicatorController().getProgressIndicatorStage().close());
+            S4AppUtil.closeThreadS4App();
         }
     }
 
@@ -354,7 +435,7 @@ public class PdfViewerController implements Initializable {
      * Нажатие на кнопку добавить версию
      */
     @FXML
-    private void addVersionInSearch() {
+    private void addVersionInSearch(){
         String msg = "";
         String select=comboBoxMaskPdfViewController.getSelectionModel().getSelectedItem();
         int i = 0;
@@ -370,20 +451,29 @@ public class PdfViewerController implements Initializable {
             AlertUtilNew.message("Проверка полей.", msg, "Не заполнены следующие поля:", Alert.AlertType.WARNING);
         }else {
             disableMainWindow(true);
+            progressIndicatorAlways();
+            //запускаю в другом потоке добавление версии
+            executorServiceLoad.submit(this::addVersionInSearchAdapter);
+        }
+    }
+    private void addVersionInSearchAdapter(){
+        int baseDocId=-1;
+        try {
+            S4AppUtil S4AppThread = S4AppUtil.returnAndCreateThreadS4App();
             byte actualizeNewVersions = 0;
-            String designation = returnDesignation(textFieldDesignation);//Обозначение с кодом типа документа
-            int baseDocId = S4App.getDocID_ByDesignation(S4App,designation);//Док Айди
-            S4App.openDocument(S4App,baseDocId);
+            String designation = returnDesignation(S4AppThread,textFieldDesignation,comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(),null);//Обозначение с кодом типа документа
+            baseDocId= S4AppThread.getDocID_ByDesignation(S4AppThread,designation);//Док Айди
+            S4AppThread.openDocument(S4AppThread,baseDocId);
             //Проверяю взятие на редактирование документ и док айди
-            if (baseDocId > 0 && S4App.getDocStatus(S4App) == 0) {
-                S4App.closeDocument(S4App);
+            if (baseDocId > 0 && S4AppThread.getDocStatus(S4AppThread) == 0) {
+                S4AppThread.closeDocument(S4AppThread);
                 String versionCode = textFieldNumberChange.getText();//Номер изменения
                 String versionNote = textAreaNote.getText();//Комментарий к версии документа
-                String stringVersionFileName = copyAndReturnFullPath(designation, S4App.getDocMaxVersionID(S4App,baseDocId) + 1);//Составляю имя файла версии
-                S4App.openQuery(S4App,"Select reasoncode from rreasons where reasontext=\"" + comboBoxChangeReasonPdfViewController.getSelectionModel().getSelectedItem() + "\"");
-                int reasonCode = Integer.parseInt(S4App.queryFieldByName(S4App,"reasoncode"));//код причины изменения из БД Серча
-                S4App.closeQuery(S4App);
-                S4App.createDocVersion(S4App,baseDocId, S4App.getDocMaxVersionID(S4App,baseDocId), versionCode, versionNote, stringVersionFileName, reasonCode, 0);
+                String stringVersionFileName = copyAndReturnFullPath(designation, S4AppThread.getDocMaxVersionID(S4AppThread,baseDocId) + 1,preferencesScanKdAndTd.get("textFieldFolderMove", USER_HOME));//Составляю имя файла версии
+                S4AppThread.openQuery(S4AppThread,"Select reasoncode from rreasons where reasontext=\"" + comboBoxChangeReasonPdfViewController.getSelectionModel().getSelectedItem() + "\"");
+                int reasonCode = Integer.parseInt(S4AppThread.queryFieldByName(S4AppThread,"reasoncode"));//код причины изменения из БД Серча
+                S4AppThread.closeQuery(S4AppThread);
+                S4AppThread.createDocVersion(S4AppThread,baseDocId, S4AppThread.getDocMaxVersionID(S4AppThread,baseDocId), versionCode, versionNote, stringVersionFileName, reasonCode, 0);
                 String fullFileName=preferencesScanKdAndTd.get("textFieldFolderScanKd", USER_HOME)+SP+listFileTable.getSelectionModel().getSelectedItem().getNameFile();
                 try {
                     Files.copy(Paths.get(fullFileName), Paths.get(stringVersionFileName), StandardCopyOption.REPLACE_EXISTING);
@@ -391,31 +481,41 @@ public class PdfViewerController implements Initializable {
                     log.error("Произошла ошибка при копировании файла:"+fullFileName,e);
                     e.printStackTrace();
                 }
-                S4App.openDocVersion(S4App,baseDocId, S4App.getDocMaxVersionID(S4App,baseDocId));
+                S4AppThread.openDocVersion(S4AppThread,baseDocId, S4AppThread.getDocMaxVersionID(S4AppThread,baseDocId));
                 //в зависимости от радиобаттонов актуализирую версию и присваиваю срок изменения
                 if (radioButtonTermChange.isSelected()) {
-                    S4App.setFieldValue_DocVersion(S4App,"termofchg", DateUtil.parseDateToString(datePickerTermChange.getValue()));
+                    S4AppThread.setFieldValue_DocVersion(S4AppThread,"termofchg", DateUtil.parseDateToString(datePickerTermChange.getValue()));
                 } else if (radioButtonActualNow.isSelected()) actualizeNewVersions = 1;
 
                 if (checkBoxRegOtdVersion.isSelected()) {
-                    S4App.setFieldValue_DocVersion(S4App,"OTD_STATUS", "1");//присваиваю статус ОТД зарегистрирован
-                    S4App.setFieldValue_DocVersion(S4App,"OTD_REG", DateUtil.parseDateToString(datePickerOtdVersion.getValue()));//дату регистрации беру из DatePicker
+                    S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_STATUS", "1");//присваиваю статус ОТД зарегистрирован
+                    S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_REG", DateUtil.parseDateToString(datePickerOtdVersion.getValue()));//дату регистрации беру из DatePicker
                 }
                 //S4App.setFieldValue_DocVersion("Кол-во листов",labelNumberOfSheets.getText());
-                S4App.saveWorkCopy(S4App,baseDocId);
-                S4App.checkIn(S4App,actualizeNewVersions);
-                S4App.closeDocument(S4App);
-                AlertUtilNew.message("Удачная регистрация версии документа.", "Ошибок при занесении в архив нет.", "Добавлена новая версия документа.", Alert.AlertType.INFORMATION);
-                disableButton(true);//Запрещаю нажатие на кнопку
+                S4AppThread.saveWorkCopy(S4AppThread,baseDocId);
+                S4AppThread.checkIn(S4AppThread,actualizeNewVersions);
+                S4AppThread.closeDocument(S4AppThread);
                 new File(fullFileName).delete(); //удаляю файл после удачной регистрации
-                updateTableView();//обновляю файлы в списке
+                Platform.runLater(()->{
+                    AlertUtilNew.message("Удачная регистрация версии документа.", "Ошибок при занесении " +
+                            "в архив нет.", "Добавлена новая версия документа.", Alert.AlertType.INFORMATION);
+                    updateTableView();//обновляю файлы в списке
+                });
+                disableButton(true);//Запрещаю нажатие на кнопку
             } else if (baseDocId == 0)
-                AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.WARNING);
+                Platform.runLater(()->AlertUtilNew.message("Оповещение.", "Документа с таким обозначением" +
+                        " нет в Search.", "Информационное сообщение.", Alert.AlertType.WARNING));
             else {
-                String nameUser = S4App.nfoGetUserFullNameByUserID(S4App,S4App.getDocStatus(S4App));
-                AlertUtilNew.message("Произошла ошибка.", "Документ взят на изменение пользователем " + nameUser + ".", "Не удалось добавить версию.", Alert.AlertType.ERROR);
+                final String nameUser = S4AppThread.nfoGetUserFullNameByUserID(S4AppThread,S4AppThread.getDocStatus(S4AppThread));
+                Platform.runLater(()->AlertUtilNew.message("Произошла ошибка.", "Документ взят на изменение пользователем " + nameUser + ".", "Не удалось добавить версию.", Alert.AlertType.ERROR));
             }
+        } catch (Exception e) {
+            log.error("Произошла ошибка при добавлении версии файла в Search с айди="+baseDocId,e);
+            e.printStackTrace();
+        } finally {
             disableMainWindow(false);
+            Platform.runLater(()->getMainApp().getProgressIndicatorController().getProgressIndicatorStage().close());
+            S4AppUtil.closeThreadS4App();
         }
     }
 
@@ -424,7 +524,7 @@ public class PdfViewerController implements Initializable {
      */
     @FXML
     private void checkVersionListDoc() {
-        String design=returnDesignation(textFieldDesignation);
+        String design=returnDesignation(S4App,textFieldDesignation,comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(),null);
         int id = S4App.getDocID_ByDesignation(S4App,design);
         if (id>0){
             S4App.hideSearch(S4App);
@@ -507,7 +607,7 @@ public class PdfViewerController implements Initializable {
                             log.error("Could not load file " + file.getName(),loadFileTask.getException());
                             AlertUtilNew.showErrorMessage("Could not load file " + file.getName(), loadFileTask.getException(), pagination);
                         });
-                        //pagination.getScene().getRoot().setDisable(true);
+                        //pagination.getScene().getRoot().setDisableAll(true);
                         pagesOfSheets = pagination.getCurrentPageIndex();
                         executorServiceLoad.submit(loadFileTask);
                     }
@@ -522,7 +622,7 @@ public class PdfViewerController implements Initializable {
     private void checkNameOfDesignation(){
         if (!textFieldDesignation.getText().isEmpty() && !textFieldDopNumberPdfView.getText().isEmpty()){
             int num=Integer.parseInt(textFieldDopNumberPdfView.getText().trim());
-            String designOld=returnDesignation(textFieldDesignation);
+            String designOld=returnDesignation(S4App,textFieldDesignation,comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(),null);
             String design;
             if (num>1){
                 design= designOld.replace("№"+num,"№"+(num-1));
@@ -542,10 +642,10 @@ public class PdfViewerController implements Initializable {
      */
     @FXML
     private void checkDesignation() {
-        String design=returnDesignation(textFieldDesignation);
+        String design=returnDesignation(S4App,textFieldDesignation,comboBoxDocTypesPdfViewController.getSelectionModel().getSelectedItem(),null);
         int baseDocId = S4App.getDocID_ByDesignation(S4App,design);
         if (baseDocId>0)
-            AlertUtilNew.message("Внимание!", "Такой документ уже есть в архиве.ID документа = " +baseDocId /*S4App.queryFieldByName(S4App,"doc_id")*/, "Сообщение для ознакомления!", Alert.AlertType.WARNING);
+            AlertUtilNew.message("Внимание!", "Такой документ уже есть в архиве.ID документа = " +baseDocId, "Сообщение для ознакомления!", Alert.AlertType.WARNING);
         else
             AlertUtilNew.message("Оповещение.", "Документа с таким обозначением нет в Search.", "Информационное сообщение.", Alert.AlertType.INFORMATION);
     }
@@ -637,12 +737,12 @@ public class PdfViewerController implements Initializable {
      */
     private void addListenerCheckBoxArbitrarily() {
         checkBoxArbitrarily.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                comboBoxFormatPdfViewController.setEditable(newValue);
-            } else {
-                comboBoxFormatPdfViewController.setEditable(newValue);
-                comboBoxFormatPdfViewController.getSelectionModel().select(0);
-            }
+            comboBoxFormatPdfViewController.setEditable(newValue);
+            if (!newValue) comboBoxFormatPdfViewController.getSelectionModel().select(0);
+        });
+        checkBoxBuroOgtTd.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            comboBoxBuroOgtTd.setEditable(newValue);
+            if (!newValue) comboBoxBuroOgtTd.getSelectionModel().select(0);
         });
     }
 
@@ -700,7 +800,10 @@ public class PdfViewerController implements Initializable {
                 comboBoxChangeReasonPdfViewController.setItems(list);
                 comboBoxChangeReasonPdfViewController.getSelectionModel().select(1);
     }
-
+    private void containComboBoxBuroOgtTd(){
+        comboBoxBuroOgtTd.getItems().addAll(arrayBuroOgt);
+        comboBoxBuroOgtTd.getSelectionModel().select(0);
+    }
 
     // ************ Initialization *************
     @Override
@@ -715,46 +818,33 @@ public class PdfViewerController implements Initializable {
         textFieldDopNumberPdfView.setTextFormatter(TextFormatterUtil.gTextFormatter("***",textFieldDopNumberPdfView));
 
         createAndConfigureExecutorsLoadService();
-        //createAndConfigureFileChooser();
-        //Запускаю в других потоках начальную загрузку из реестра
-        //executorServiceLoad.submit(this::containComboBoxMask);
-        //executorServiceLoad.submit(this::containComboBoxDocTypes);
-        //executorServiceLoad.submit(this::containComboBoxFormats);
-        //executorServiceLoad.submit(this::addListenerTextFieldDesignation);
-        //executorServiceLoad.submit(this::addListenerCheckBoxArbitrarily);
-        //executorServiceLoad.submit(this::addListenerComboBoxMaskPdfView);
 
         currentFile = new SimpleObjectProperty<>();
-        //updateWindowTitleWhenFileChanges();
 
         currentImage = new SimpleObjectProperty<>();
         scroller.contentProperty().bind(currentImage);
 
         zoom = new SimpleDoubleProperty(1);
-        // To implement zooming, we just get a new image from the PDFFile each time.
-        // This seems to perform well in some basic tests but may need to be improved
-        // E.g. load a larger image and scale in the ImageView, loading a new image only
-        // when required.
         zoom.addListener((observable, oldValue, newValue) -> updateImage(pagination.getCurrentPageIndex(), DEGREE));
         labelCurrentZoom.textProperty().bind(Bindings.format("%.0f %%", zoom.multiply(100)));
-        //невидимость Табов на форме
-        /**hideFormPdfView();*/
 
         /**Чтение из БД Серча причин изменения из таблицы rreasons*/
         Platform.runLater(() -> containComboBoxChangeReason());
         Platform.runLater(() -> containComboBoxMask());
         Platform.runLater(() -> containComboBoxDocTypes());
         Platform.runLater(() -> containComboBoxFormats());
-        Platform.runLater(() -> addListenerTextFieldDesignation());
-        Platform.runLater(() -> addListenerCheckBoxArbitrarily());
-        Platform.runLater(() -> addListenerComboBoxMaskPdfView());
-        Platform.runLater(() -> addListenerTextFieldDopNumberPdfView());
-        Platform.runLater(() -> addListenerTableViewList());
-        Platform.runLater(() -> initTableColumnAll());
-        //Platform.runLater(() -> checkNameOfDesignation());
+        Platform.runLater(() -> containComboBoxBuroOgtTd());
+        executorServiceLoad.submit(()->{
+            addListenerTextFieldDesignation();
+            addListenerCheckBoxArbitrarily();
+            addListenerComboBoxMaskPdfView();
+            addListenerTextFieldDopNumberPdfView();
+            addListenerTableViewList();
+            initTableColumnAll();
+            bindingButtonExportInSearchTp();
+        });
         bindPaginationToCurrentFile();
         createPaginationPageFactory();
-        //test2.selectedProperty().set(true);
         hideFormPdfView();
     }
 
@@ -983,27 +1073,115 @@ public class PdfViewerController implements Initializable {
     private void initTableColumnAll(){
         tableColDesignObjectTp.setCellValueFactory(new PropertyValueFactory<>("designation"));
         tableColNameObjectTp.setCellValueFactory(new PropertyValueFactory<>("name"));
+        tableColArtIdObjectTp.setCellValueFactory(new PropertyValueFactory<>("artId"));
         tableColNumberObjectTp.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewObjectTp.getItems().indexOf(param.getValue())+1));
         tableColDesignNumSheet.setCellValueFactory(new PropertyValueFactory<>("textFieldDesignNumberSheet"));
         tableColNumberSheet.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewNumberSheet.getItems().indexOf(param.getValue())+1));
         tableColButtonMapSketch.setCellValueFactory(new PropertyValueFactory<>("buttonScan"));
+        tableColTextFieldNumChangeMapSketch.setCellValueFactory(new PropertyValueFactory<>("textFieldNumChangeMapSketchTd"));
+        tableColTextFieldDesignIIMapSketch.setCellValueFactory(new PropertyValueFactory<>("textFieldDesignIIMapSketchTd"));
+        tableColTextFieldOtdRegNumMapSketch.setCellValueFactory(new PropertyValueFactory<>("textFieldOtdRegNumMapSketch"));
         tableColTextFieldMapSketch.setCellValueFactory(new PropertyValueFactory<>("textFieldDesignMapSketch"));
         tableColNumberMapSketch.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(tableViewMapSketchTd.getItems().indexOf(param.getValue())+1));
 
-        textFieldPathMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD,textFieldPathMapTd));
-        textFieldOperationMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD, textFieldOperationMapTd));
-        textFieldSheetMaterialTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD, textFieldSheetMaterialTd));
-        textFieldSetMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD, textFieldSheetMaterialTd));
-        textFieldNumberIITd.setTextFormatter(TextFormatterUtil.gTextFormatter("***",textFieldNumberIITd));
+        textFieldDesignPathMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD, textFieldDesignPathMapTd));
+        textFieldDesignOperationMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD, textFieldDesignOperationMapTd));
+        textFieldDesignSheetMaterialTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD, textFieldDesignSheetMaterialTd));
+        textFieldDesignSetMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD, textFieldDesignSheetMaterialTd));
+        textFieldNumChangePathMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter("***", textFieldNumChangePathMapTd));
+        textFieldNumChangeOperationMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter("***", textFieldNumChangeOperationMapTd));
+        textFieldNumChangeSetMapTd.setTextFormatter(TextFormatterUtil.gTextFormatter("***", textFieldNumChangeSetMapTd));
+        textFieldNumChangeSheetMaterialTd.setTextFormatter(TextFormatterUtil.gTextFormatter("***", textFieldNumChangeSheetMaterialTd));
+
+    }
+    /**Адаптер на exportInSearchTP()*/
+    @FXML
+    private void exportInSearchTpAdapter(){
+        disableMainWindow(true);
+        getMainApp().showProgressIndicator();
+        getMainApp().getProgressIndicatorController().getProgressIndicatorStage().show();
+        executorServiceLoad.submit(this::exportInSearchTP);
     }
 
-    /**Выполняется при нажатии на кнопку <<Выбрать из Search>> на вкладке Сканирование КД*/
+    /**Выполняется при нажатии на кнопку <<Занести в Search>> на вкладке Сканирование ТД*/
+    private void exportInSearchTP(){
+        String text="";
+        try {
+            S4AppUtil S4AppThread = S4AppUtil.returnAndCreateThreadS4App();
+            long archive=preferencesScanKdAndTd.getLong("textFieldArchiveIdTd",323);
+            String designation=returnDesignation(S4AppThread, textFieldDesignPathMapTd,null,preferencesScanKdAndTd.getLong("textFieldTpIdTd",1000633));
+            String fullName=copyAndReturnFullPath(designation,0,preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME));
+            long docType=preferencesScanKdAndTd.getLong("textFieldTpIdTd",1000633);
+            String docName="Техпроцесс сканированный";//Наименование документа ТП
+            ProgressIndicator progInd=getMainApp().getProgressIndicatorController().getProgressIndicator();
+            progInd.setProgress(0.2d);
+            long id=S4AppThread.createFileDocumentWithDocType(S4AppThread,fullName,docType,archive,designation,docName,SECTION_ID);
+            if (id>0) {
+                String temp="";
+                ObservableList list;
+                int link=0;
+                long artId=S4AppThread.getArtID_ByDesignation(S4AppThread,designation);
+                S4AppThread.openDocVersion(S4AppThread,id,0);
+                S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_STATUS", "1");//присваиваю статус ОТД зарегистрирован
+                S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_REG", DateUtil.parseDateToString(DateUtil.NOW_LOCAL_DATE()));//дата регистрации
+                progInd.setProgress(0.4d);
+                S4AppThread.closeDocument(S4AppThread);
+                S4AppThread.openDocument(S4AppThread,id);
+                if (!textFieldRouteCeh.getText().isEmpty()) S4AppThread.setFieldValue(S4AppThread,"Маршрут изготовления",textFieldRouteCeh.getText());
+                S4AppThread.setFieldValue(S4AppThread,"Наименование бюро разработчика",comboBoxBuroOgtTd.getSelectionModel().getSelectedItem());
+                list=tableViewNumberSheet.getItems();
+                for (int i = 0; i < list.size(); i++) {
+                    temp+=((NumberSheet)list.get(i)).getTextFieldDesignNumberSheet().getText()+";";
+
+                }
+                progInd.setProgress(0.6d);
+                if (!temp.isEmpty()) S4AppThread.setFieldValue(S4AppThread,"Номер ведомости ТП на покрытие",temp);
+                S4AppThread.checkIn(S4AppThread);//возвращаю файл в архив
+                S4AppThread.closeDocument(S4AppThread);
+                list=tableViewObjectTp.getItems();
+                for (int i = 0; i <list.size() ; i++) {
+                    link=S4AppThread.linkDocToArticle(S4AppThread,((ObjectTp)list.get(i)).getArtId(),id,1,0);
+                    if (link==0) text+="Произошла ошибка при включении документации с айди="+id+" на объект с арт. айди="+((ObjectTp)list.get(i)).getArtId()+"\r\n";
+                    link=0;
+                }
+                progInd.setProgress(0.8d);
+                for (int i = 0; i <listDocIdScan.size() ; i++) {
+                    //link=S4AppThread.linkDocVersionToArticleVersion(S4AppThread,artId,0,listDocIdScan.get(i),0,1,0);
+                    link=S4AppThread.linkDocToArticle(S4AppThread,artId,listDocIdScan.get(i),1,0);
+                    if (link==0) text+="Произошла ошибка при включении документации с айди="+listDocIdScan.get(i)+" на объект с арт. айди="+artId+"\r\n";
+                    link=0;
+                }
+                progInd.setProgress(1.0d);
+            }
+        }finally {
+            final String textAlert=text;
+            Platform.runLater(()->{
+                getMainApp().getProgressIndicatorController().getProgressIndicatorStage().close();
+                if (!"".equals(textAlert)) Platform.runLater(()->AlertUtilNew.message("Ошибки.","В процессе занесения в архив Техпроцесса" +
+                        " произошли такие ошибки:"+textAlert,"Ошибки Search.", Alert.AlertType.ERROR));
+                else AlertUtilNew.message("Успешно.","Техпроцесс успешно создан и все привязки документации " +
+                        "к объектам были выполнены успешно.","Техпроцесс создан в Search.", Alert.AlertType.INFORMATION);
+                AnchorPane tabContent=(AnchorPane)tabScanTdPdfView.getContent();
+                enableAll(tabContent.getChildren());
+                clearAll(tabContent.getChildren());
+            });
+            listDocIdScan.clear();
+            disableMainWindow(false);
+            S4AppUtil.closeThreadS4App();
+        }
+    }
+    /**Выполняется при нажатии на кнопку <<Выбрать из Search>> на вкладке Сканирование ТД*/
     @FXML
     public void clickButtonSelectInSearchObject(){
         disableMainWindow(true);
         executorServiceLoad.submit(this::clickButtonSelectInSearchObjectThread);
+        /**запускаю в другом потоке заполнение таблицы Imbase*/
+        //if (getMainApp().getImbaseTreeController().getTreeItemImbase()==null){
+            executorServiceLoad.submit(() -> getMainApp().showImbaseTree());
+        //}
     }
     /**Запуск в потоке открытия окна выбора объектов из Search*/
+    @FXML
     public void clickButtonSelectInSearchObjectThread(){
         S4AppUtil S4AppThread = S4AppUtil.returnAndCreateThreadS4App();
         try {
@@ -1018,11 +1196,12 @@ public class PdfViewerController implements Initializable {
                 S4AppThread.startSelectArticles(S4AppThread);
                 S4AppThread.hideSearch(S4AppThread);
                 S4AppThread.showSearch(S4AppThread);
-                S4AppThread.selectArticlesSample(S4AppThread,-2,"ScanKdAndTd","(#Тип объекта# = 3) OR (#Тип объекта# = 4)","");
+                S4AppThread.selectArticlesSample(S4AppThread,-2,"ScanKdAndTd",SELECT_SQL_IN_OBJECT,"");
                 //S4AppThread.selectArticlesBySectID(S4AppThread,SECTION_ID_DETAIL,-1);
                 for (int i = 0; i < S4AppThread.selectedArticlesCount(S4AppThread); i++) {
                     S4AppThread.openArticle(S4AppThread, S4AppThread.getSelectedArticleID(S4AppThread, i));
-                    tableViewObjectTp.getItems().add(new ObjectTp(S4AppThread.getArticleDesignation(S4AppThread), S4AppThread.getArticleName(S4AppThread)));
+                    String design=S4AppThread.getArticleDesignation(S4AppThread);
+                    tableViewObjectTp.getItems().add(new ObjectTp(design, S4AppThread.getArticleName(S4AppThread),S4AppThread.getArtID_ByDesignation(S4AppThread,design)));
                     S4AppThread.closeArticle(S4AppThread);
                 }
                 S4AppThread.endSelectArticles(S4AppThread);
@@ -1036,19 +1215,81 @@ public class PdfViewerController implements Initializable {
 
         }
     }
+
     /**Выполняется на кнопку "Добавить карту эскизов",добавляется строка с текстфилдом и кнопкой в таблицу Карт эскизов*/
     @FXML
     private void addMapSketch(){
-        TextField textField=new TextField();
+        TextField textFieldDesignMapSketch=new TextField();
+        TextField textFieldOtdRegNumMapSketch=new TextField();
+        TextField textFieldDesignIIMapSketchTd=new TextField();
+        TextField textFieldNumChangeMapSketchTd=new TextField();
         Button button=new Button("Сканировать");
         Tooltip tooltip=new Tooltip("Допускается ввод только по маске \"В25.*****.*****\"");
-        textField.setTooltip(tooltip);
-        textField.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD,textField));
+        textFieldDesignMapSketch.setTooltip(tooltip);
+        tooltip=new Tooltip("Допускается ввод номера до 1000(включительно).");
+        textFieldNumChangeMapSketchTd.setTooltip(tooltip);
+        textFieldDesignMapSketch.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD,textFieldDesignMapSketch));
+        textFieldNumChangeMapSketchTd.setTextFormatter(TextFormatterUtil.gTextFormatter("***",textFieldNumChangeMapSketchTd));
         button.setOnMouseClicked(event -> {
-        long docType=1000632;//doc_type "Карта эскизов и схем сканированая" из таблицы doctypes
-        executorServiceLoad.submit(() -> getPdfFromScanner(textField,button,"Карта эскизов и схем сканированая",docType));
+        long docType=preferencesScanKdAndTd.getLong("textFieldMapSketchIdTd",1000632);//doc_type "Карта эскизов и схем сканированая" из таблицы doctypes
+        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldDesignMapSketch,textFieldOtdRegNumMapSketch,textFieldNumChangeMapSketchTd,textFieldDesignIIMapSketchTd,button,"Карта эскизов и схем сканированая",docType));
         });
-        tableViewMapSketchTd.getItems().add(new MapSketch(textField,button));
+        tableViewMapSketchTd.getItems().add(new MapSketch(textFieldDesignMapSketch,textFieldOtdRegNumMapSketch,textFieldNumChangeMapSketchTd,textFieldDesignIIMapSketchTd,button));
+    }
+
+    /**Метод сканирования*/
+    private void getPdfFromScanner(TextField textFieldDesign,TextField textFieldOtdRegNum,TextField textFieldNumChange,TextField textFieldDesignII,Button button, String name, Long docType){
+        int idTemp;
+        S4AppUtil S4AppThread = S4AppUtil.returnAndCreateThreadS4App();
+        if (textFieldDesign.getText().length() != STR_FORMAT_TD.length()) {
+            Platform.runLater(() -> AlertUtilNew.message("Внимание!", "Заполните поле обозначение.", "Пустое поле обозначение.", Alert.AlertType.WARNING));
+        } else if ((idTemp = S4AppThread.getDocID_ByDesignation(S4AppThread, textFieldDesign.getText())) > 0) {
+            Platform.runLater(() -> AlertUtilNew.message("Внимание!", "Документ с таким обозначением уже есть в архиве Search.Айди документа=" + idTemp, "Сообщение для ознакомления", Alert.AlertType.WARNING));
+        } else {
+            disableMainWindow(true);
+            try {
+                Platform.runLater(()->progressIndicatorAlways());
+                String design = textFieldDesign.getText();
+                int DPI = preferencesScanKdAndTd.getInt("textFieldDpiScanTd", 450);
+                String fullFileName = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.pdf";
+                String fullFileNameTif = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.tif";
+                long archive = preferencesScanKdAndTd.getLong("textFieldArchiveIdTd", 323);
+                S4AppThread.getImageFromScanner(S4AppThread, fullFileNameTif, -1, 0, DPI, 1, false, false, false, false);
+                //создаю новый файл с расширением PDF
+                File file = new File(convertTiff2Pdf(fullFileNameTif));
+                if (!file.exists()) file.createNewFile();
+                //удаляю файл с расширением тиф
+                new File(fullFileNameTif).delete();
+                long id = S4AppThread.createFileDocumentWithDocType(S4AppThread, fullFileName, docType, archive, design, name, SECTION_ID);//создаю документ
+                if (id>0) {
+                    listDocIdScan.add(id);
+                    //S4AppThread.openDocument(S4AppThread, id);
+                    S4AppThread.openDocVersion(S4AppThread,id,0);
+                    S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_STATUS", "1");//присваиваю статус ОТД зарегистрирован
+                    S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTD_REG", DateUtil.parseDateToString(DateUtil.NOW_LOCAL_DATE()));//дата регистрации
+                    if (!textFieldOtdRegNum.getText().isEmpty()) S4AppThread.setFieldValue_DocVersion(S4AppThread,"OTDREGNUM", textFieldOtdRegNum.getText());//регистрационный номер
+                    if (!textFieldNumChange.getText().isEmpty()) S4AppThread.setFieldValue_DocVersion(S4AppThread,"VER_CODE", textFieldNumChange.getText());//номер изменения ИИ
+                    if (!textFieldDesignII.getText().isEmpty()) S4AppThread.setFieldValue_DocVersion(S4AppThread,"VER_NOTE", textFieldDesignII.getText());//в комментарии записываю номер ИИ
+                    S4AppThread.saveChanges(S4AppThread);
+                    S4AppThread.checkIn(S4AppThread);
+                    S4AppThread.closeDocument(S4AppThread);
+                }
+            }catch(IOException e){
+                e.printStackTrace();
+                log.error("Ошибка при удалении темп файла.",e);
+            } finally {
+                //Закрываю поток в любом случае
+                S4AppUtil.closeThreadS4App();
+                textFieldDesign.setDisable(true);
+                textFieldDesignII.setDisable(true);
+                textFieldNumChange.setDisable(true);
+                textFieldOtdRegNum.setDisable(true);
+                button.setDisable(true);
+                Platform.runLater(()->getMainApp().getProgressIndicatorController().getProgressIndicatorStage().close());
+                disableMainWindow(false);
+            }
+        }
+
     }
     /**Выполняется на кнопку "Добавить ведомость",добавляется строка с текстфилдом в таблицу Ведомостей*/
     @FXML
@@ -1056,7 +1297,7 @@ public class PdfViewerController implements Initializable {
         TextField textField=new TextField();
         Tooltip tooltip=new Tooltip(TOOLTIP_STR_FORMAT_TD);
         textField.setTooltip(tooltip);
-        textField.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD,textField));
+        //textField.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD,textField));
         tableViewNumberSheet.getItems().add(new NumberSheet(textField));
     }
     /**удаляется строка из таблицы Объектов*/
@@ -1074,61 +1315,156 @@ public class PdfViewerController implements Initializable {
     private void deleteNumberSheet(){
         OptionsController.deleteRowsInTable(tableViewNumberSheet);
     }
+
     @FXML
     private void clickButtonScanRouteMapTd(){
-        long docType=1000628;//doc_type "Маршрутной карты сканированной" из таблицы doctypes
-        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldPathMapTd,buttonRouteMapScanTd,"Маршрутная карта сканированная",docType));
+        long docType=preferencesScanKdAndTd.getLong("textFieldPathMapIdTd",1000628);//doc_type "Маршрутной карты сканированной" из таблицы doctypes
+        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldDesignPathMapTd,textFieldOtdRegNumPathMapTd,textFieldNumChangePathMapTd,textFieldDesignationIIPathMapTd,buttonRouteMapScanTd,"Маршрутная карта сканированная",docType));
 
     }
     @FXML
     private void clickButtonScanSetMapTd(){
-        long docType=1000629;//doc_type "Комплектовочная карта сканированной" из таблицы doctypes
-        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldSetMapTd,buttonSetMapScanTd,"Комплектовочная карта сканированная",docType));
+        long docType=preferencesScanKdAndTd.getLong("textFieldSetMapIdIdTd",1000629);//doc_type "Комплектовочная карта сканированной" из таблицы doctypes
+        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldDesignSetMapTd,textFieldOtdRegNumSetMapTd,textFieldNumChangeSetMapTd,textFieldDesignationIISetMapTd,buttonSetMapScanTd,"Комплектовочная карта сканированная",docType));
 
     }
     @FXML
     private void clickButtonScanSheetMaterialTd(){
-        long docType=1000630;//doc_type "Ведомость материалов сканированной" из таблицы doctypes
-        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldSheetMaterialTd,buttonSheetMaterialScanTd,"Ведомость материалов сканированная",docType));
+        long docType=preferencesScanKdAndTd.getLong("textFieldSheetMaterialIdTd",1000630);//doc_type "Ведомость материалов сканированной" из таблицы doctypes
+        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldDesignSheetMaterialTd,textFieldOtdRegNumSheetMaterialTd,textFieldNumChangeSheetMaterialTd,textFieldDesignationIISheetMaterialTd,buttonSheetMaterialScanTd,"Ведомость материалов сканированная",docType));
 
     }
     @FXML
     private void clickButtonScanOperationMapTd(){
-        long docType=1000631;//doc_type "Операционная карта сканированной" из таблицы doctypes
-        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldOperationMapTd,buttonOperationMapScanTd,"Операционная карта сканированная",docType));
+        long docType=preferencesScanKdAndTd.getLong("textFieldOperationMapIdTd",1000631);//doc_type "Операционная карта сканированной" из таблицы doctypes
+        executorServiceLoad.submit(() -> getPdfFromScanner(textFieldDesignOperationMapTd,textFieldOtdRegNumOperationMapTd,textFieldNumChangeOperationMapTd,textFieldDesignationIIOperationMapTd,buttonOperationMapScanTd,"Операционная карта сканированная",docType));
 
     }
-    private void getPdfFromScanner(TextField textField,Button button,String name,Long docType){
-        if (textField.getText().length()!=STR_FORMAT_TD.length()) {
-            Platform.runLater(()->AlertUtilNew.message("Внимание!","Заполните поле обозначение.","Пустое поле обозначение.", Alert.AlertType.WARNING));
-        }else {
-            disableMainWindow(true);
-            S4AppUtil S4AppThread=S4AppUtil.returnAndCreateThreadS4App();
-            try {
-                String design=textField.getText();
-                int DPI=preferencesScanKdAndTd.getInt("textFieldDpiScanTd",450 );
-                String fullFileName=preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME)+SP+design+" Скан.PDF";
-                long archive=preferencesScanKdAndTd.getLong("textFieldArchiveIdTd",323);
-                S4AppThread.getImageFromScanner(S4AppThread,fullFileName,-1,0,DPI,1,false,false,false,false);
-                long id = S4AppThread.createFileDocumentWithDocType(S4AppThread,fullFileName, docType, archive, design, name, SECTION_ID);//создаю документ
-                S4AppThread.openDocument(S4AppThread,id);
-                S4AppThread.saveChanges(S4AppThread);
-                S4AppThread.checkIn(S4AppThread);
-                S4AppThread.closeDocument(S4AppThread);
-            }finally {
-                //Закрываю поток в любом случае
-                S4AppUtil.closeThreadS4App();
-                disableMainWindow(false);
-                textField.setDisable(true);
-                button.setDisable(true);
+
+    /**Метод конвертации тиф в pdf*/
+    private static String convertTiff2Pdf(String tiff) {
+        // target path PDF
+        String pdf = null;
+        try {
+            pdf = tiff.substring(0, tiff.lastIndexOf('.') + 1) + "pdf";
+            // новый документ в формате А4
+            Document document = new Document(PageSize.LETTER, 0, 0, 0, 0);
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdf));
+            int pages = 0;
+            document.open();
+            PdfContentByte cb = writer.getDirectContent();
+            RandomAccessFileOrArray ra = null;
+            int comps = 0;
+            ra = new RandomAccessFileOrArray(tiff);
+            comps = TiffImage.getNumberOfPages(ra);
+            // Сама конвертация
+            for (int c = 0; c < comps; ++c) {
+                com.itextpdf.text.Image img = TiffImage.getTiffImage(ra, c + 1);
+                if (img != null) {
+                    img.scalePercent(7200f / img.getDpiX(), 7200f / img.getDpiY());
+                    document.setPageSize(new com.itextpdf.text.Rectangle(img.getScaledWidth(),img.getScaledHeight()));
+                    img.setAbsolutePosition(0, 0);
+                    cb.addImage(img);
+                    document.newPage();
+                    ++pages;
+                }
             }
+            ra.close();
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Ошибка при ковертации файла tif в pdf",e);
+            pdf = null;
         }
+        return pdf;
 
     }
-
+    /**Вызов формы выбора цехов*/
     @FXML
     private void handleImbaseTreeForm(){
         getMainApp().showImbaseTree();
         getMainApp().getImbaseTreeController().getImbaseDialogStage().showAndWait();
+    }
+    /**Вызыввается метод при нажатии на кнопку "Разблокировать все"*/
+    @FXML
+    private void enableButtonAndTextfield(){
+        AnchorPane tabContent=(AnchorPane)tabScanTdPdfView.getContent();
+        enableAll(tabContent.getChildren());
+    }
+    /**Разблокировка всех кнопок на форме ТД*/
+    private void enableAll(ObservableList list){
+        for (int i = 0; i <list.size() ; i++) {
+            if (list.get(i).equals(buttonExportInSearchTp)) continue;
+            switch (list.get(i).getClass().getSimpleName()){
+                case "Button":
+                    ((Button) list.get(i)).setDisable(false);
+                    break;
+                case "TextField":
+                    ((TextField)list.get(i)).setDisable(false);
+                    break;
+                case "MapSketch":
+                    ((MapSketch)list.get(i)).setDisableAll(false);
+                    break;
+                case "VBox":
+                    enableAll(((VBox)list.get(i)).getChildren());
+                    break;
+                case "HBox":
+                    enableAll(((HBox)list.get(i)).getChildren());
+                    break;
+                case "TableView":
+                    enableAll(((TableView)list.get(i)).getItems());
+                    break;
+            }
+        }
+    }
+    @FXML
+    private void clearAllTextFieldTd(){
+        AnchorPane tabContent=(AnchorPane)tabScanTdPdfView.getContent();
+        clearAll(tabContent.getChildren());
+    }
+
+    /**Очистка всех текстфилдов на форме ТД*/
+    private void clearAll(ObservableList list){
+        for (int i = 0; i <list.size() ; i++) {
+            switch (list.get(i).getClass().getSimpleName()){
+                case "TextField":
+                    TextField temp=(TextField)list.get(i);
+                    if (temp!=null && temp.getTextFormatter()!=null && temp.getTextFormatter().getValue().equals("В25.")){
+                        temp.setText("В25.");
+                    }else temp.clear();
+                    break;
+                case "MapSketch":
+                    ((MapSketch)list.get(i)).clearAllMapSketch();
+                    break;
+                case "NumberSheet":
+                    ((NumberSheet)list.get(i)).clearAllNumberSheet();
+                    break;
+                case "VBox":
+                    clearAll(((VBox)list.get(i)).getChildren());
+                    break;
+                case "HBox":
+                    clearAll(((HBox)list.get(i)).getChildren());
+                    break;
+                case "TableView":
+                    clearAll(((TableView)list.get(i)).getItems());
+                    break;
+            }
+        }
+    }
+    /**Слушатель для блокировки и разблокировки кнопки 'Занести в Search'*/
+    private void bindingButtonExportInSearchTp(){
+        BooleanBinding booleanBinding= textFieldDesignPathMapTd.textProperty().length().isNotEqualTo(STR_FORMAT_TD.length())
+                .or(Bindings.size(tableViewObjectTp.getItems()).isEqualTo(0));
+        //BooleanBinding booleanBinding=(textFieldDesignPathMapTd.disableProperty().not())
+        buttonExportInSearchTp.disableProperty().bind(booleanBinding);
+
+    }
+
+    public TextField getTextFieldRouteCeh() {
+        return textFieldRouteCeh;
+    }
+
+    public void setTextFieldRouteCeh(TextField textFieldRouteCeh) {
+        this.textFieldRouteCeh = textFieldRouteCeh;
     }
 }

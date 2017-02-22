@@ -84,13 +84,27 @@ public class OptionsController implements Initializable{
     @FXML
     private TextField textFieldDpiScanTd;
     @FXML
-    private ComboBox<String> comboBoxScanKDTypeDoc;
-    @FXML
-    private Label labelSaveNotice;
-    @FXML
     private TextField textFieldArchiveIdKd;
     @FXML
     private TextField textFieldArchiveIdTd;
+    @FXML
+    private TextField textFieldTpIdTd;
+    @FXML
+    private TextField textFieldPathMapIdTd;
+    @FXML
+    private TextField textFieldSetMapIdIdTd;
+    @FXML
+    private TextField textFieldSheetMaterialIdTd;
+    @FXML
+    private TextField textFieldOperationMapIdTd;
+    @FXML
+    private TextField textFieldMapSketchIdTd;
+    @FXML
+    private PasswordField passwordFieldOptionsFirst;
+    @FXML
+    private PasswordField passwordFieldOptionsSecond;
+    @FXML
+    private ComboBox<String> comboBoxScanKDTypeDoc;
     @FXML
     private ComboBox<String> comboBoxMask;
     @FXML
@@ -101,6 +115,8 @@ public class OptionsController implements Initializable{
     private CheckBox checkBoxScanKdNewOptions;
     @FXML
     private CheckBox checkBoxScanKdVersionOptions;
+    @FXML
+    private Label labelSaveNotice;
 
     /**Дисэйбл формы опционс*/
     private void disableOptios(boolean flag){
@@ -154,42 +170,51 @@ public class OptionsController implements Initializable{
     }
     /**Сохранение в реестр при нажатии на кнопку "Сохранить"*/
     public void onClickMouseButtonSave(){
-        if (textFieldArchiveIdKd.getText().isEmpty()) {
-            AlertUtilNew.message("Внимание!","Выберите архив из списка архивов Search!","Пустое поле архивы.", Alert.AlertType.WARNING);
-        }else {
+        if (!textFieldArchiveIdKd.getText().isEmpty()) {
             preferencesScanKdAndTd.putLong("textFieldArchiveIdKd", Long.parseLong(textFieldArchiveIdKd.getText()));
+        } else AlertUtilNew.message("Внимание!", "Выберите архив сканирования КД из списка архивов Search!", "Пустое поле архивы.", Alert.AlertType.WARNING);
+        if (!textFieldArchiveIdTd.getText().isEmpty()) {
             preferencesScanKdAndTd.putLong("textFieldArchiveIdTd", Long.parseLong(textFieldArchiveIdTd.getText()));
-            preferencesScanKdAndTd.putLong("textFieldDpiScanTd", Integer.parseInt(textFieldDpiScanTd.getText()));
-            preferencesScanKdAndTd.put("textFieldFolderScanKd", textFieldFolderScanKd.getText());
-            preferencesScanKdAndTd.put("textFieldFolderScanTd", textFieldFolderScanTd.getText());
-            preferencesScanKdAndTd.put("textFieldFolderMoveKd", textFieldFolderMoveKd.getText());
-            preferencesScanKdAndTd.putBoolean("checkBoxScanKdOptions",checkBoxScanKdOptions.selectedProperty().get());
-            preferencesScanKdAndTd.putBoolean("checkBoxScanKdNewOptions",checkBoxScanKdNewOptions.selectedProperty().get());
-            preferencesScanKdAndTd.putBoolean("checkBoxScanKdVersionOptions",checkBoxScanKdVersionOptions.selectedProperty().get());
-            preferencesScanKdAndTd.putBoolean("checkBoxScanTdOptions",checkBoxScanTdOptions.selectedProperty().get());
-            checkBoxScanTdOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions",true));
-            try {
-                preferencesTableViewDocTypes.clear();
-                preferencesTableViewInputMask.clear();
-                preferencesTableViewFormats.clear();
-            } catch (BackingStoreException e) {
-                log.error("Ошибка при очистке реестра.",e);
-                e.printStackTrace();
-            }
-            for (DocTypes types : tableViewDocTypes.getItems()) {
-                preferencesTableViewDocTypes.put(types.getDocName(), types.getDtCode());
-            }
-            int i = 0;
-            for (InputMask inputMask : tableViewInputMask.getItems()) {
-                preferencesTableViewInputMask.put(inputMask.getMask(), "" + i++);
-            }
-            i = 0;
-            for (Formats formats : tableViewFormats.getItems()) {
-                preferencesTableViewFormats.put(formats.getFormat(), "" + i++);
-            }
-            labelSaveNotice.setText("Изменения сохранены.");
-            Platform.runLater(() ->updatePdfViewAfterClickSave());
+        } else AlertUtilNew.message("Внимание!", "Выберите архив сканирования ТД из списка архивов Search!", "Пустое поле архивы.", Alert.AlertType.WARNING);
+        if (passwordFieldOptionsFirst.getText().equals(passwordFieldOptionsSecond.getText()) || (!passwordFieldOptionsFirst.getText().isEmpty() && !passwordFieldOptionsSecond.getText().isEmpty())){
+            preferencesScanKdAndTd.put("password",passwordFieldOptionsFirst.getText());
+        }else AlertUtilNew.message("Внимание!", "Введите правильно пароль в 2 поля,иначе он не изменится.", "Несовпадение полей..", Alert.AlertType.WARNING);
+        preferencesScanKdAndTd.putLong("textFieldDpiScanTd", Integer.parseInt(textFieldDpiScanTd.getText()));//DPI
+        preferencesScanKdAndTd.putLong("textFieldTpIdTd", Integer.parseInt(textFieldTpIdTd.getText()));//Техпроцесс сканированный
+        preferencesScanKdAndTd.putLong("textFieldPathMapIdTd", Integer.parseInt(textFieldPathMapIdTd.getText()));//Маршрутная карта сканированная
+        preferencesScanKdAndTd.putLong("textFieldSetMapIdIdTd", Integer.parseInt(textFieldSetMapIdIdTd.getText()));//Комплектовочная карта сканированная
+        preferencesScanKdAndTd.putLong("textFieldSheetMaterialIdTd", Integer.parseInt(textFieldSheetMaterialIdTd.getText()));//Ведомость материалов сканированная
+        preferencesScanKdAndTd.putLong("textFieldOperationMapIdTd", Integer.parseInt(textFieldOperationMapIdTd.getText()));//Операционная карта сканированная
+        preferencesScanKdAndTd.putLong("textFieldMapSketchIdTd", Integer.parseInt(textFieldMapSketchIdTd.getText()));//Карта эскизов и схем сканированная
+        preferencesScanKdAndTd.put("textFieldFolderScanKd", textFieldFolderScanKd.getText());
+        preferencesScanKdAndTd.put("textFieldFolderScanTd", textFieldFolderScanTd.getText());
+        preferencesScanKdAndTd.put("textFieldFolderMoveKd", textFieldFolderMoveKd.getText());
+        preferencesScanKdAndTd.putBoolean("checkBoxScanKdOptions", checkBoxScanKdOptions.selectedProperty().get());
+        preferencesScanKdAndTd.putBoolean("checkBoxScanKdNewOptions", checkBoxScanKdNewOptions.selectedProperty().get());
+        preferencesScanKdAndTd.putBoolean("checkBoxScanKdVersionOptions", checkBoxScanKdVersionOptions.selectedProperty().get());
+        preferencesScanKdAndTd.putBoolean("checkBoxScanTdOptions", checkBoxScanTdOptions.selectedProperty().get());
+        checkBoxScanTdOptions.selectedProperty().set(preferencesScanKdAndTd.getBoolean("checkBoxScanTdOptions", true));
+        try {
+            preferencesTableViewDocTypes.clear();
+            preferencesTableViewInputMask.clear();
+            preferencesTableViewFormats.clear();
+        } catch (BackingStoreException e) {
+            log.error("Ошибка при очистке реестра.", e);
+            e.printStackTrace();
         }
+        for (DocTypes types : tableViewDocTypes.getItems()) {
+            preferencesTableViewDocTypes.put(types.getDocName(), types.getDtCode());
+        }
+        int i = 0;
+        for (InputMask inputMask : tableViewInputMask.getItems()) {
+            preferencesTableViewInputMask.put(inputMask.getMask(), "" + i++);
+        }
+        i = 0;
+        for (Formats formats : tableViewFormats.getItems()) {
+            preferencesTableViewFormats.put(formats.getFormat(), "" + i++);
+        }
+        labelSaveNotice.setText("Изменения сохранены.");
+        Platform.runLater(() -> updatePdfViewAfterClickSave());
     }
     /**Заполнения таблицы Маски по нажатию кнопки "Добавить"*/
     @FXML
@@ -308,6 +333,12 @@ public class OptionsController implements Initializable{
 
     /**Чтение данных из реестра,для задания значений в форме Options(TextField and e.g. )*/
     private void loadBaseOptions(){
+        textFieldTpIdTd.setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldTpIdTd",1000633)));//Техпроцесс сканированный
+        textFieldPathMapIdTd.setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldPathMapIdTd",1000628)));//Маршрутная карта сканированная
+        textFieldSetMapIdIdTd.setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldSetMapIdIdTd",1000629)));//Комплектовочная карта сканированная
+        textFieldSheetMaterialIdTd.setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldSheetMaterialIdTd",1000630)));//Ведомость материалов сканированная
+        textFieldOperationMapIdTd.setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldOperationMapIdTd",1000631)));//Операционная карта сканированная
+        textFieldMapSketchIdTd.setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldMapSketchIdTd",1000632)));//Карта эскизов и схем сканированная
         getTextFieldArchiveIdKd().setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldArchiveIdKd",323)));
         getTextFieldArchiveIdTd().setText(String.valueOf(preferencesScanKdAndTd.getLong("textFieldArchiveIdTd",323)));
         getTextFieldDpiScanTd().setText(String.valueOf(preferencesScanKdAndTd.getInt("textFieldDpiScanTd",450 )));
@@ -418,6 +449,54 @@ public class OptionsController implements Initializable{
 
     public void setTextFieldDpiScanTd(TextField textFieldDpiScanTd) {
         this.textFieldDpiScanTd = textFieldDpiScanTd;
+    }
+
+    public TextField getTextFieldTpIdTd() {
+        return textFieldTpIdTd;
+    }
+
+    public void setTextFieldTpIdTd(TextField textFieldTpIdTd) {
+        this.textFieldTpIdTd = textFieldTpIdTd;
+    }
+
+    public TextField getTextFieldPathMapIdTd() {
+        return textFieldPathMapIdTd;
+    }
+
+    public void setTextFieldPathMapIdTd(TextField textFieldPathMapIdTd) {
+        this.textFieldPathMapIdTd = textFieldPathMapIdTd;
+    }
+
+    public TextField getTextFieldSetMapIdIdTd() {
+        return textFieldSetMapIdIdTd;
+    }
+
+    public void setTextFieldSetMapIdIdTd(TextField textFieldSetMapIdIdTd) {
+        this.textFieldSetMapIdIdTd = textFieldSetMapIdIdTd;
+    }
+
+    public TextField getTextFieldSheetMaterialIdTd() {
+        return textFieldSheetMaterialIdTd;
+    }
+
+    public void setTextFieldSheetMaterialIdTd(TextField textFieldSheetMaterialIdTd) {
+        this.textFieldSheetMaterialIdTd = textFieldSheetMaterialIdTd;
+    }
+
+    public TextField getTextFieldOperationMapIdTd() {
+        return textFieldOperationMapIdTd;
+    }
+
+    public void setTextFieldOperationMapIdTd(TextField textFieldOperationMapIdTd) {
+        this.textFieldOperationMapIdTd = textFieldOperationMapIdTd;
+    }
+
+    public TextField getTextFieldMapSketchIdTd() {
+        return textFieldMapSketchIdTd;
+    }
+
+    public void setTextFieldMapSketchIdTd(TextField textFieldMapSketchIdTd) {
+        this.textFieldMapSketchIdTd = textFieldMapSketchIdTd;
     }
 
     @Override

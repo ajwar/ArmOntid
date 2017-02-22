@@ -12,13 +12,15 @@ import org.apache.log4j.Logger;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.prefs.Preferences;
 
 public class MainWindowController implements Initializable {
     private MainApp mainApp;
     private static final Logger log=Logger.getLogger(MainWindowController.class);
     private S4AppUtil S4App = S4AppUtil.getInstance();
-    private static final String LOGIN = "ajwar";
-    private static final String PASSWORD = "ra0843766";
+    private Preferences preferencesScanKdAndTd = MainApp.getPreferencesScanKdAndTd();
+    //private static final String LOGIN = preferencesScanKdAndTd.get();
+    //private static final String PASSWORD = "ra0843766";
     private static volatile boolean FL=false;
     /*@FXML
     private ScrollPane scrollerMainWindow;*/
@@ -45,7 +47,7 @@ public class MainWindowController implements Initializable {
     @FXML
     private void handleMenuItemOptions() {
         Platform.runLater(() -> getMainApp().showOptionsWindow());
-        AlertUtilNew.messageLogAndPass(LOGIN, PASSWORD);
+        AlertUtilNew.messageLogAndPass(preferencesScanKdAndTd.get("login","sysdba"), preferencesScanKdAndTd.get("password","masterkey"));
         if (FL) {
             getMainApp().getOptionsController().getOptionsDialogStage().showAndWait();
         } else{

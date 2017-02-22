@@ -1,6 +1,8 @@
 package com.yandex.ajwar.model;
 
 
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 /**
@@ -9,6 +11,7 @@ import javafx.beans.property.SimpleStringProperty;
 public class ObjectTp {
     private final SimpleStringProperty designation;
     private final SimpleStringProperty name;
+    private final SimpleIntegerProperty artId;
 
     public String getDesignation() {
         return designation.get();
@@ -34,8 +37,21 @@ public class ObjectTp {
         this.name.set(name);
     }
 
-    public ObjectTp(String designationStr, String nameStr) {
+    public long getArtId() {
+        return artId.get();
+    }
+
+    public SimpleIntegerProperty artIdProperty() {
+        return artId;
+    }
+
+    public void setArtId(int artId) {
+        this.artId.set(artId);
+    }
+
+    public ObjectTp(String designationStr, String nameStr, Integer artIdLong) {
         this.designation = new SimpleStringProperty(designationStr);
         this.name = new SimpleStringProperty(nameStr);
+        this.artId=new SimpleIntegerProperty(artIdLong);
     }
 }

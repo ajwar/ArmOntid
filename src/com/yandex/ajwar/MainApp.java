@@ -3,25 +3,27 @@ package com.yandex.ajwar;
 
 import com.yandex.ajwar.model.StringData;
 import com.yandex.ajwar.util.S4AppUtil;
-import com.yandex.ajwar.view.ImbaseTreeController;
-import com.yandex.ajwar.view.MainWindowController;
-import com.yandex.ajwar.view.OptionsController;
-import com.yandex.ajwar.view.PdfViewerController;
+import com.yandex.ajwar.view.*;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URISyntaxException;
 import java.util.prefs.Preferences;
 
@@ -41,6 +43,7 @@ public class MainApp extends Application {
     private OptionsController optionsController;
     private MainWindowController mainWindowController;
     private ImbaseTreeController imbaseTreeController;
+    private ProgressIndicatorController progressIndicatorController;
     private ObservableList<StringData> stringNameFileData = FXCollections.observableArrayList();
 
     @Override
@@ -62,18 +65,18 @@ public class MainApp extends Application {
             System.exit(0);
         }
         //узнаю где находится запускаемый Jar файл
-        String currentPath=MainApp.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-/*        String currentPath=MainApp.class
+        String currentPath=MainApp.class
                 .getProtectionDomain()
                 .getCodeSource().getLocation()
                 .toURI().getPath()
-                .replace('/', File.separator.charAt(0)).substring(1);*/
-        //если память кучи меньше 1gb,то перезапускаю программу с нач. 512 мб и конечной 2гб памятью
-        if(args.length==0 && Runtime.getRuntime().maxMemory()/1024/1024<980) {
-            Runtime.getRuntime().exec("java -jar -Xms512m -Xmx2048m -Dcom.jacob.autogc=TRUE "+currentPath+" restart");
-            return;
+                .replace('/', File.separator.charAt(0)).substring(1);
+        //если память кучи меньше 1gb и нет входных аргументов,то перезапускаю программу с нач. 512 мб и конечной 2гб памятью
+        if(args.length == 0 && Runtime.getRuntime().maxMemory() / 1024 / 1024 < 980) {
+            Runtime.getRuntime().exec("java -jar -Xms512m -Xmx1024m -Dcom.jacob.autogc=TRUE " + currentPath);
+            System.exit(0);
+        } else {
+            launch(args);
         }
-        launch(args);
     }
 
     /**Загрузка главной формы.*/
@@ -157,10 +160,33 @@ public class MainApp extends Application {
             getImbaseTreeController().setImbaseDialogStage(stageImbase);
             //stageImbase.sizeToScene();
             stageImbase.initStyle(StageStyle.UNDECORATED);
-
             //stageImbase.setResizable(false);
         } catch (IOException e) {
             log.error("Ошибка при загрузке формы настроек (ImbaseTree.fxml).", e);
+            e.printStackTrace();
+        }
+    }
+
+    public void showProgressIndicator(){
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/ProgressIndicator.fxml"));
+            AnchorPane pane = (AnchorPane) loader.load();
+            pane.setBackground(Background.EMPTY);
+            Stage stageProgInd = new Stage();
+            stageProgInd.initModality(Modality.WINDOW_MODAL);
+            stageProgInd.initOwner(primaryStage);
+            Scene scene = new Scene(pane, Color.TRANSPARENT);
+            //scene.setFill(Color.TRANSPARENT);
+            stageProgInd.setScene(scene);
+            progressIndicatorController=loader.getController();
+            progressIndicatorController.setMainApp(this);
+            progressIndicatorController.setProgressIndicatorStage(stageProgInd);
+            //scene.getStylesheets().add("");
+            //stageImbase.sizeToScene();
+            stageProgInd.initStyle(StageStyle.TRANSPARENT);
+        } catch (IOException e) {
+            log.error("Ошибка при загрузке формы настроек (ProgressIndicator.fxml).", e);
             e.printStackTrace();
         }
     }
@@ -264,5 +290,13 @@ public class MainApp extends Application {
 
     public void setImbaseTreeController(ImbaseTreeController imbaseTreeController) {
         this.imbaseTreeController = imbaseTreeController;
+    }
+
+    public ProgressIndicatorController getProgressIndicatorController() {
+        return progressIndicatorController;
+    }
+
+    public void setProgressIndicatorController(ProgressIndicatorController progressIndicatorController) {
+        this.progressIndicatorController = progressIndicatorController;
     }
 }

@@ -13,10 +13,8 @@
     <orderEntry type="library" name="jacob" level="project" />
     <orderEntry type="library" name="log4j-1.2.17" level="project" />
     <orderEntry type="library" name="PDFRenderer-0.9.1.proba" level="project" />
+    <orderEntry type="library" name="itextpdf-5.4.0" level="project" />
     <orderEntry type="library" name="libs" level="project" />
     <orderEntry type="library" name="libs1" level="project" />
-    <orderEntry type="library" name="api" level="project" />
-    <orderEntry type="library" name="libs2" level="project" />
-    <orderEntry type="library" name="libs3" level="project" />
   </component>
 </module>

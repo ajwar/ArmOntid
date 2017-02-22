@@ -252,6 +252,18 @@ public class S4AppUtil extends ActiveXComponent{
     public int getSelectedArticleID(ActiveXComponent S4App,long num){
         return Dispatch.call(S4App,"GetSelectedArticleID",num).getInt();
     }
+    public int linkDocToArticle(ActiveXComponent S4App,long artId,long docId,long linkType,long linkToIsp){
+        return Dispatch.call(S4App,"LinkDocToArticle",artId,docId,linkType,linkToIsp).getInt();
+    }
+    public int linkDocToArticle(ActiveXComponent S4App,long artId,long artVerId,long docId,long linkType,long linkToIsp){
+        return Dispatch.call(S4App,"LinkDocToArticle",artId,artVerId,docId,linkType,linkToIsp).getInt();
+    }
+    public int linkDocVersionToArticleVersion(ActiveXComponent S4App,long artId,long artVerId,long docId,long docVersionId,long linkType,long linkToIsp){
+        return Dispatch.call(S4App,"LinkDocVersionToArticleVersion",artId,artVerId,docId,docVersionId,linkType,linkToIsp).getInt();
+    }
+    public int getArtID_ByDesignation(ActiveXComponent S4App,String designation){
+        return Dispatch.call(S4App,"GetArtID_ByDesignation",designation).getInt();
+    }
     public boolean getImageFromScanner(ActiveXComponent S4App,String fileName,long imagesToScan,long colorFormat,long resolution,long paperSize,boolean selectSource,boolean enableADF,boolean duplex,boolean showForm){
         return Dispatch.call(S4App,"GetImageFromScanner",fileName,imagesToScan,colorFormat,resolution,paperSize,selectSource,enableADF,duplex,showForm).getBoolean();
     }

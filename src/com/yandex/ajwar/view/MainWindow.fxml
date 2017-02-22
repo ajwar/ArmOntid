@@ -31,5 +31,4 @@
 <!--    <fx:define>
         <ScrollPane fx:id="scrollerMainWindow" fitToHeight="true" fitToWidth="true" pannable="true" />
     </fx:define>-->
-
 </BorderPane>

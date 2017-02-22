@@ -27,7 +27,7 @@ public class TextFormatterUtil {
                 }
                 @Override
                 public String fromString(String string) {
-                    Pattern regexp = Pattern.compile("В25.\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d\\d"); //Пример строки для ВИЕЛ.16.9.154.320
+                    Pattern regexp = Pattern.compile("В25.\\d\\d\\d\\d\\d\\.\\d\\d\\d\\d\\d"); //Пример строки для В25.12345.67890
                     Matcher m = regexp.matcher(string);
                     if (string.length() == 15 && m.matches()) return string;
                     else return "В25.";
@@ -76,17 +76,17 @@ public class TextFormatterUtil {
                 }
                 @Override
                 public String fromString(String string) {
-                    Pattern regexp = Pattern.compile("^([1-9]{1}|[1-9]{1}[0-9]{1}|100)$"); //Пример строки для 5ВЩ.162.677
+                    Pattern regexp = Pattern.compile("^([1-9]{1}|[1-9]{1}[0-9]{1}|[1-9]{1}[0-9]{1}[0-9]{1}|1000)$"); //Пример строки для 5ВЩ.162.677
                     Matcher m = regexp.matcher(string);
                     if (m.matches()) return string;
                     else return "";
                 }
             };
             filter= c -> {
-                if ((c.getControlNewText().length()==3 && !c.getControlNewText().matches("^([1-9]{1}|[1-9]{1}[0-9]{1}|100)$")) || (c.getControlNewText().length()==1 && "0".equals(c.getText()))) {
+                if ((c.getControlNewText().length()==4 && !c.getControlNewText().matches("^([1-9]{1}|[1-9]{1}[0-9]{1}|[1-9]{1}[0-9]{1}[0-9]{1}|1000)$")) || (c.getControlNewText().length()==1 && "0".equals(c.getText()))) {
                     return null;
                 }
-                if ((!c.getText().matches("\\d") && c.isAdded()) || c.getControlNewText().length()>3) return null;
+                if ((!c.getText().matches("\\d") && c.isAdded()) || c.getControlNewText().length()>4) return null;
                 return c;
             };
         }
@@ -100,7 +100,7 @@ public class TextFormatterUtil {
                 }
                 @Override
                 public String fromString(String string) {
-                    Pattern regexp = Pattern.compile("^\\d\\d-\\d\\d\\d\\d$"); //Пример строки для 5ВЩ.162.677
+                    Pattern regexp = Pattern.compile("^\\d\\d-\\d\\d\\d\\d$"); //Пример строки для заказа
                     Matcher m = regexp.matcher(string);
                     if (string.length() == 7 && m.matches()) return string;
                     else return "";

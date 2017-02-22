@@ -25,4 +25,7 @@ public class NumberSheet {
     public void setTextFieldDesignNumberSheet(TextField textFieldDesignNumberSheet) {
         this.textFieldDesignNumberSheet.set(textFieldDesignNumberSheet);
     }
+    public void clearAllNumberSheet(){
+        this.textFieldDesignNumberSheet.get().clear();
+    }
 }
