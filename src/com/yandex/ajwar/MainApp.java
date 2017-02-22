@@ -84,7 +84,7 @@ public class MainApp extends Application {
         try {
             FXMLLoader loader=new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/MainWindow.fxml"));
-            getPrimaryStage().getIcons().add(new Image(MainApp.class.getResourceAsStream("/images/IcoMainWindow.png")));
+            getPrimaryStage().getIcons().add(new Image(MainApp.class.getResourceAsStream("/images/IcoMainWindowNew.png")));
             setMainBorderPane((BorderPane)loader.load());
             Scene scene=new Scene(getMainBorderPane());
             getPrimaryStage().centerOnScreen();
