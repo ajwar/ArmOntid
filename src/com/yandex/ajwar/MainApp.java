@@ -68,11 +68,12 @@ public class MainApp extends Application {
         String currentPath=MainApp.class
                 .getProtectionDomain()
                 .getCodeSource().getLocation()
-                .toURI().getPath()
-                .replace('/', File.separator.charAt(0)).substring(1);
+                .getPath()
+                .replace('/', File.separator.charAt(0));
+        if (currentPath.indexOf(":")<3 && currentPath.indexOf(":")>0) currentPath=currentPath.substring(1);
         //если память кучи меньше 1gb и нет входных аргументов,то перезапускаю программу с нач. 512 мб и конечной 2гб памятью
         if(args.length == 0 && Runtime.getRuntime().maxMemory() / 1024 / 1024 < 980) {
-            Runtime.getRuntime().exec("java -jar -Xms512m -Xmx1024m -Dcom.jacob.autogc=TRUE " + currentPath);
+            Runtime.getRuntime().exec("java -jar -Xms256m -Xmx1024m -Dcom.jacob.autogc=TRUE " + currentPath+" restart");
             System.exit(0);
         } else {
             launch(args);
@@ -86,6 +87,7 @@ public class MainApp extends Application {
             loader.setLocation(MainApp.class.getResource("view/MainWindow.fxml"));
             getPrimaryStage().getIcons().add(new Image(MainApp.class.getResourceAsStream("/images/IcoMainWindowNew.png")));
             setMainBorderPane((BorderPane)loader.load());
+            //getMainBorderPane().setBackground(Background.EMPTY);
             Scene scene=new Scene(getMainBorderPane());
             getPrimaryStage().centerOnScreen();
             getPrimaryStage().setScene(scene);
