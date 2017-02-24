@@ -29,6 +29,8 @@ import javafx.util.Pair;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
+
 import org.apache.log4j.Logger;
 
 public class AlertUtilNew extends Application {
@@ -153,15 +155,16 @@ public class AlertUtilNew extends Application {
     /**
      * Вывод простого сообщения
      */
-    public static void message(String title, String text, String headerText, Alert.AlertType type) {
+    public static Optional<ButtonType> message(String title, String text, String headerText, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(headerText);
         alert.setContentText(text);
         //Внедряю диалог в вызывающее окно(вызывается на том мониторе,где и главное).
         alert.initOwner(StageHelper.getStages().get(0));
-        alert.showAndWait();
+        return alert.showAndWait();
     }
+
 
     /**
      * Вывод сообщения об ошибке

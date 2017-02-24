@@ -6,6 +6,8 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
 import com.itextpdf.text.pdf.codec.TiffImage;
+import com.itextpdf.text.pdf.codec.TiffWriter;
+import com.sun.media.jai.codec.*;
 import com.sun.pdfview.PDFFile;
 import com.sun.pdfview.PDFPage;
 import com.yandex.ajwar.MainApp;
@@ -46,14 +48,14 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.apache.log4j.Logger;
 
+import javax.media.jai.NullOpImage;
+import javax.media.jai.OpImage;
+import javax.media.jai.PlanarImage;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -95,6 +97,8 @@ public class PdfViewerController implements Initializable {
     private static final String USER_HOME=MainApp.getUserHome();
     private static final String SELECT_SQL_IN_OBJECT="((#Тип объекта# = 3) OR (#Тип объекта# = 4)) AND (#Обозначение# <> '')";
     private static List<Long> listDocIdScan=new ArrayList<>();
+    private volatile static boolean flagScan=false;
+    private volatile static boolean flagScanPlatform=false;
     //private static final String HOME_PATH_SCAN="";
     //private final String FULL_PATH_FILE ="\\AppData\\Local\\Temp\\_IMS\\";
     private static final byte SECTION_ID = 1; //Раздел документация(столбец SECTION_ID) в таблице SSECTION
@@ -1239,7 +1243,7 @@ public class PdfViewerController implements Initializable {
 
     /**Метод сканирования*/
     private void getPdfFromScanner(TextField textFieldDesign,TextField textFieldOtdRegNum,TextField textFieldNumChange,TextField textFieldDesignII,Button button, String name, Long docType){
-        int idTemp;
+        int idTemp,itemTif = 0 ;
         S4AppUtil S4AppThread = S4AppUtil.returnAndCreateThreadS4App();
         if (textFieldDesign.getText().length() != STR_FORMAT_TD.length()) {
             Platform.runLater(() -> AlertUtilNew.message("Внимание!", "Заполните поле обозначение.", "Пустое поле обозначение.", Alert.AlertType.WARNING));
@@ -1253,13 +1257,37 @@ public class PdfViewerController implements Initializable {
                 int DPI = preferencesScanKdAndTd.getInt("textFieldDpiScanTd", 450);
                 String fullFileName = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.pdf";
                 String fullFileNameTif = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.tif";
+                File pathTemp=new File(preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP+"tempScanAr");
+                pathTemp.mkdirs();
+                String strTempTif=pathTemp.getAbsolutePath()+SP+"tempScan";
+                System.out.println(pathTemp+"темп папка для скана");
                 long archive = preferencesScanKdAndTd.getLong("textFieldArchiveIdTd", 323);
-                S4AppThread.getImageFromScanner(S4AppThread, fullFileNameTif, -1, 0, DPI, 1, false, false, false, false);
+                while (!flagScan){
+                    S4AppThread.getImageFromScanner(S4AppThread, strTempTif+""+ pathTemp.listFiles().length +".tif", -1, 0, DPI, 1, false, false, false, false);
+                    Platform.runLater(()->{
+                        Optional<ButtonType> result=AlertUtilNew.message("Сканирование документации.","Продолжить сканирование?","Выбор сканирования.", Alert.AlertType.CONFIRMATION);
+                        if (result.get()==ButtonType.OK){
+                            flagScanPlatform=true;
+                        }else {
+                            flagScanPlatform=flagScan=true;
+                        }
+                    });
+                    while(!flagScanPlatform){
+                        try {
+                            Thread.currentThread().sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }flagScanPlatform=false;
+                }flagScan=false;
                 //создаю новый файл с расширением PDF
-                File file = new File(convertTiff2Pdf(fullFileNameTif));
+                File file = new File(convertTiff2Pdf(fullFileNameTif,pathTemp.listFiles()));
                 if (!file.exists()) file.createNewFile();
+                //удаляю папку с файлами
+                delete(pathTemp);
+                pathTemp.delete();
                 //удаляю файл с расширением тиф
-                new File(fullFileNameTif).delete();
+                //delete(new File(fullFileNameTif));
                 long id = S4AppThread.createFileDocumentWithDocType(S4AppThread, fullFileName, docType, archive, design, name, SECTION_ID);//создаю документ
                 if (id>0) {
                     listDocIdScan.add(id);
@@ -1289,7 +1317,53 @@ public class PdfViewerController implements Initializable {
                 disableMainWindow(false);
             }
         }
+    }
 
+    private static void delete(File file){
+        if(!file.exists())
+            return;
+        if(file.isDirectory()){
+            for(File f : file.listFiles())
+                delete(f);
+            file.delete();
+        }else{
+            file.delete();
+        }
+    }
+    /**Метод конвертации тиф в pdf*/
+    private static String convertTiff2Pdf(String tiff,File[] file) {
+        // target path PDF
+        String pdf = null;
+        try {
+            pdf = tiff.substring(0, tiff.lastIndexOf('.') + 1) + "pdf";
+            // новый документ в формате А4
+            Document document = new Document(PageSize.LETTER, 0, 0, 0, 0);
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdf));
+            document.open();
+            PdfContentByte cb = writer.getDirectContent();
+            RandomAccessFileOrArray ra=null;
+            for (int i = 0; i <file.length ; i++) {
+                //int comps = 0;
+                ra = new RandomAccessFileOrArray(file[i].getAbsolutePath());
+                //comps = TiffImage.getNumberOfPages(ra);
+                // Сама конвертация
+                    com.itextpdf.text.Image img = TiffImage.getTiffImage(ra,1);
+                    if (img != null) {
+                        img.scalePercent(7200f / img.getDpiX(), 7200f / img.getDpiY());
+                        document.setPageSize(new com.itextpdf.text.Rectangle(img.getScaledWidth(),img.getScaledHeight()));
+                        img.setAbsolutePosition(0, 0);
+                        cb.addImage(img);
+                        document.newPage();
+                    }
+            }
+            ra.close();
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Ошибка при ковертации файла tif в pdf",e);
+            pdf = null;
+        }
+        return pdf;
     }
     /**Выполняется на кнопку "Добавить ведомость",добавляется строка с текстфилдом в таблицу Ведомостей*/
     @FXML
@@ -1341,44 +1415,6 @@ public class PdfViewerController implements Initializable {
 
     }
 
-    /**Метод конвертации тиф в pdf*/
-    private static String convertTiff2Pdf(String tiff) {
-        // target path PDF
-        String pdf = null;
-        try {
-            pdf = tiff.substring(0, tiff.lastIndexOf('.') + 1) + "pdf";
-            // новый документ в формате А4
-            Document document = new Document(PageSize.LETTER, 0, 0, 0, 0);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdf));
-            int pages = 0;
-            document.open();
-            PdfContentByte cb = writer.getDirectContent();
-            RandomAccessFileOrArray ra = null;
-            int comps = 0;
-            ra = new RandomAccessFileOrArray(tiff);
-            comps = TiffImage.getNumberOfPages(ra);
-            // Сама конвертация
-            for (int c = 0; c < comps; ++c) {
-                com.itextpdf.text.Image img = TiffImage.getTiffImage(ra, c + 1);
-                if (img != null) {
-                    img.scalePercent(7200f / img.getDpiX(), 7200f / img.getDpiY());
-                    document.setPageSize(new com.itextpdf.text.Rectangle(img.getScaledWidth(),img.getScaledHeight()));
-                    img.setAbsolutePosition(0, 0);
-                    cb.addImage(img);
-                    document.newPage();
-                    ++pages;
-                }
-            }
-            ra.close();
-            document.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            log.error("Ошибка при ковертации файла tif в pdf",e);
-            pdf = null;
-        }
-        return pdf;
-
-    }
     /**Вызов формы выбора цехов*/
     @FXML
     private void handleImbaseTreeForm(){

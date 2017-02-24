@@ -429,26 +429,26 @@
                         </HBox>
                         <HBox maxHeight="25.0" prefHeight="100.0" prefWidth="200.0">
                            <children>
-                              <Label minHeight="25.0" minWidth="200.0" />
-                              <Label alignment="CENTER" minHeight="25.0" minWidth="150.0" text="Обозначение документа" underline="true" />
-                              <Label alignment="CENTER" layoutX="210.0" layoutY="10.0" minHeight="25.0" minWidth="150.0" text="Инвентарный номер ОТД" underline="true" />
-                              <Label alignment="CENTER" minHeight="25.0" minWidth="150.0" text="Номер изменения" underline="true" />
-                              <Label alignment="CENTER" minHeight="25.0" minWidth="150.0" text="ИИ документа" underline="true" />
+                              <Label maxWidth="200.0" minHeight="25.0" minWidth="200.0" />
+                              <Label alignment="CENTER" maxWidth="150.0" minHeight="25.0" minWidth="150.0" text="Обозначение документа" underline="true" />
+                              <Label alignment="CENTER" layoutX="210.0" layoutY="10.0" maxWidth="150.0" minHeight="25.0" minWidth="150.0" text="Инвентарный номер ОТД" underline="true" />
+                              <Label alignment="CENTER" maxWidth="150.0" minHeight="25.0" minWidth="150.0" text="Номер изменения" underline="true" />
+                              <Label alignment="CENTER" maxWidth="150.0" minHeight="25.0" minWidth="150.0" text="ИИ документа" underline="true" />
                            </children>
                         </HBox>
                         <HBox minHeight="25.0">
                            <children>
-                              <Label minHeight="25.0" minWidth="200.0" text="Маршрутная карта" />
-                              <TextField fx:id="textFieldDesignPathMapTd" minHeight="25.0" minWidth="150.0">
+                              <Label maxWidth="200.0" minHeight="25.0" minWidth="200.0" text="Маршрутная карта" />
+                              <TextField fx:id="textFieldDesignPathMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldOtdRegNumPathMapTd" minHeight="25.0" minWidth="150.0" />
-                              <TextField fx:id="textFieldNumChangePathMapTd" minHeight="25.0" minWidth="150.0">
+                              <TextField fx:id="textFieldOtdRegNumPathMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldNumChangePathMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод числа до 1000 (включительно)." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldDesignationIIPathMapTd" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldDesignationIIPathMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
                               <Button fx:id="buttonRouteMapScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanRouteMapTd" text="Сканировать">
                                  <graphic>
                                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
@@ -461,17 +461,17 @@
                         </HBox>
                         <HBox layoutX="10.0" layoutY="217.0" minHeight="25.0">
                            <children>
-                              <Label minHeight="25.0" minWidth="200.0" text="Комплектовочная карта" />
-                              <TextField fx:id="textFieldDesignSetMapTd" minHeight="25.0" minWidth="150.0">
+                              <Label maxWidth="200.0" minHeight="25.0" minWidth="200.0" text="Комплектовочная карта" />
+                              <TextField fx:id="textFieldDesignSetMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldOtdRegNumSetMapTd" minHeight="25.0" minWidth="150.0" />
-                              <TextField fx:id="textFieldNumChangeSetMapTd" minHeight="25.0" minWidth="150.0">
+                              <TextField fx:id="textFieldOtdRegNumSetMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldNumChangeSetMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод числа до 1000 (включительно)." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldDesignationIISetMapTd" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldDesignationIISetMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
                               <Button fx:id="buttonSetMapScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanSetMapTd" text="Сканировать">
                                  <graphic>
                                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
@@ -484,17 +484,17 @@
                         </HBox>
                         <HBox layoutX="10.0" layoutY="249.0" minHeight="25.0">
                            <children>
-                              <Label minHeight="25.0" minWidth="200.0" text="Ведомость материалов" />
-                              <TextField fx:id="textFieldDesignSheetMaterialTd" minHeight="25.0" minWidth="150.0">
+                              <Label maxWidth="200.0" minHeight="25.0" minWidth="200.0" text="Ведомость материалов" />
+                              <TextField fx:id="textFieldDesignSheetMaterialTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldOtdRegNumSheetMaterialTd" minHeight="25.0" minWidth="150.0" />
-                              <TextField fx:id="textFieldNumChangeSheetMaterialTd" minHeight="25.0" minWidth="150.0">
+                              <TextField fx:id="textFieldOtdRegNumSheetMaterialTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldNumChangeSheetMaterialTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод числа до 1000 (включительно)." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldDesignationIISheetMaterialTd" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldDesignationIISheetMaterialTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
                               <Button fx:id="buttonSheetMaterialScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanSheetMaterialTd" text="Сканировать">
                                  <graphic>
                                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
@@ -507,17 +507,17 @@
                         </HBox>
                         <HBox layoutX="10.0" layoutY="281.0" minHeight="25.0">
                            <children>
-                              <Label minHeight="25.0" minWidth="200.0" text="Операционная карта" />
-                              <TextField fx:id="textFieldDesignOperationMapTd" minHeight="25.0" minWidth="150.0">
+                              <Label maxWidth="200.0" minHeight="25.0" minWidth="200.0" text="Операционная карта" />
+                              <TextField fx:id="textFieldDesignOperationMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод только по маске &quot;В25.*****.*****&quot;." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldOtdRegNumOperationMapTd" minHeight="25.0" minWidth="150.0" />
-                              <TextField fx:id="textFieldNumChangeOperationMapTd" minHeight="25.0" minWidth="150.0">
+                              <TextField fx:id="textFieldOtdRegNumOperationMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldNumChangeOperationMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0">
                                  <tooltip>
                                     <Tooltip text="Допускается ввод числа до 1000 (включительно)." />
                                  </tooltip></TextField>
-                              <TextField fx:id="textFieldDesignationIIOperationMapTd" minHeight="25.0" minWidth="150.0" />
+                              <TextField fx:id="textFieldDesignationIIOperationMapTd" maxWidth="150.0" minHeight="25.0" minWidth="150.0" />
                               <Button fx:id="buttonOperationMapScanTd" minHeight="25.0" mnemonicParsing="false" onAction="#clickButtonScanOperationMapTd" text="Сканировать">
                                  <graphic>
                                     <ImageView fitHeight="15.0" fitWidth="15.0" pickOnBounds="true" preserveRatio="true">
@@ -603,8 +603,8 @@
                   </Button>
                   <VBox layoutX="858.0" layoutY="529.0" spacing="7.0">
                      <children>
-                        <Button maxWidth="130.0" mnemonicParsing="false" onAction="#clearAllTextFieldTd" text="Очистить все" />
-                        <Button layoutX="10.0" layoutY="10.0" maxWidth="130.0" mnemonicParsing="false" onAction="#enableButtonAndTextfield" text="Разблокировать все" />
+                        <Button minWidth="130.0" mnemonicParsing="false" onAction="#clearAllTextFieldTd" text="Очистить все" />
+                        <Button layoutX="10.0" layoutY="10.0" minWidth="130.0" mnemonicParsing="false" onAction="#enableButtonAndTextfield" text="Разблокировать все" />
                      </children>
                   </VBox>
                </children></AnchorPane>

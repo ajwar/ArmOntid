@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="440.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yandex.ajwar.view.OptionsController">
+<AnchorPane prefHeight="470.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.yandex.ajwar.view.OptionsController">
    <children>
       <TabPane cache="true" rotateGraphic="true" stylesheets="@styleOptions.css" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <tabs>
@@ -138,26 +138,27 @@
                            <children>
                               <HBox>
                                  <children>
-                                    <Label maxHeight="25.0" minHeight="25.0" text="Папка для сканирования:" />
+                                    <Label maxHeight="25.0" minHeight="25.0" minWidth="150.0" text="Папка для сканирования:" />
                                     <TextField fx:id="textFieldFolderScanTd" promptText="Папка сканирования" />
                                     <Button mnemonicParsing="false" onAction="#openFolderScanButtonTd" text="..." />
                                  </children>
                               </HBox>
                               <HBox layoutX="10.0" layoutY="10.0">
                                  <children>
+                                    <Label minHeight="25.0" minWidth="150.0" text="Айди архива ТД:" />
                                     <TextField fx:id="textFieldArchiveIdTd" promptText="Айди архива" />
-                                    <Button mnemonicParsing="false" text="Выбор архива" />
+                                    <Button mnemonicParsing="false" onAction="#addArchiveButtonScanTd" text="Выбор архива" />
                                  </children>
                               </HBox>
                               <HBox prefHeight="100.0" prefWidth="200.0">
                                  <children>
-                                    <Label maxHeight="25.0" minHeight="25.0" text="DPI сканера:" />
+                                    <Label maxHeight="25.0" minHeight="25.0" minWidth="150.0" text="DPI сканера:" />
                                     <TextField fx:id="textFieldDpiScanTd" promptText="DPI" />
                                  </children>
                               </HBox>
                            </children>
                         </VBox>
-                        <TitledPane animated="false" layoutX="315.0" layoutY="2.0" prefHeight="243.0" prefWidth="282.0" text="ID из таблицы doctypes" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="3.0">
+                        <TitledPane animated="false" layoutX="315.0" layoutY="2.0" prefHeight="243.0" prefWidth="282.0" text="ID из таблицы doctypes" AnchorPane.leftAnchor="3.0" AnchorPane.topAnchor="100.0">
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>

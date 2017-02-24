@@ -225,18 +225,22 @@ public class OptionsController implements Initializable{
     /**Выбор архива из Search для сканированной документации*/
     @FXML
     private void addArchiveButtonScanKd(){
+        addArchiveButton(textFieldArchiveIdKd);
+    }
+    @FXML
+    private void addArchiveButtonScanTd(){
+        addArchiveButton(textFieldArchiveIdTd);
+    }
+    /**Выбор архива из Search*/
+    public void addArchiveButton(TextField textField){
         disableOptios(true);
         try {
             S4App.hideSearch(S4App);
             S4App.showSearch(S4App);
-            addArchiveButton(textFieldArchiveIdKd);
+            textField.setText(String.valueOf(S4App.chooseArchiveName(S4App)));
         } finally {
             disableOptios(false);
         }
-    }
-    /**Выбор архива из Search*/
-    public void addArchiveButton(TextField textField){
-        textField.setText(String.valueOf(S4App.chooseArchiveName(S4App)));
     }
 
     /**Заполнение выпадающего списка,где можно выбирать типы документов*/

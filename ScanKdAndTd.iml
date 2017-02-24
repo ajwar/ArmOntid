@@ -16,5 +16,6 @@
     <orderEntry type="library" name="itextpdf-5.4.0" level="project" />
     <orderEntry type="library" name="libs" level="project" />
     <orderEntry type="library" name="libs1" level="project" />
+    <orderEntry type="library" name="jai_codec" level="project" />
   </component>
 </module>
