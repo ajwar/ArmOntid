@@ -396,7 +396,7 @@ public class PdfViewerController implements Initializable {
             try {
                 Files.copy(Paths.get(fullFileName), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                log.error("Ошибка при копировании файла.",e);
+                log.error("Ошибка при копировании файла " +path+".",e);
                 e.printStackTrace();
             }
             id= S4AppThread.createFileDocumentWithDocType(S4AppThread,path, docType, archive, designation, textAreaName.getText(), SECTION_ID);//создаю документ

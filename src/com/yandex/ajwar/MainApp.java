@@ -71,7 +71,7 @@ public class MainApp extends Application {
                 .getPath()
                 .replace('/', File.separator.charAt(0));
         if (currentPath.indexOf(":")<3 && currentPath.indexOf(":")>0) currentPath=currentPath.substring(1);
-        //если память кучи меньше 1gb и нет входных аргументов,то перезапускаю программу с нач. 512 мб и конечной 2гб памятью
+        //если память кучи меньше 1gb и нет входных аргументов,то перезапускаю программу с нач. 256 мб и конечной 1гб памятью
         if(args.length == 0 && Runtime.getRuntime().maxMemory() / 1024 / 1024 < 980) {
             Runtime.getRuntime().exec("java -jar -Xms256m -Xmx1024m -Dcom.jacob.autogc=TRUE " + currentPath+" restart");
             System.exit(0);
