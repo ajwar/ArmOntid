@@ -43,6 +43,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.apache.log4j.Logger;
+import sun.nio.ch.FileKey;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -89,6 +90,7 @@ public class PdfViewerController implements Initializable {
     private static final String SP=MainApp.getSP();
     private static final String USER_HOME=MainApp.getUserHome();
     private static final String SELECT_SQL_IN_OBJECT="((#Тип объекта# = 3) OR (#Тип объекта# = 4)) AND (#Обозначение# <> '')";
+    private static final String PATH_TEMP_FILE_SCAN=USER_HOME+SP+"tempPathScanAr";
     private static List<Long> listDocIdScan=new ArrayList<>();
     private volatile static boolean flagScan=false;
     private volatile static boolean flagScanPlatform=false;
@@ -839,6 +841,7 @@ public class PdfViewerController implements Initializable {
             addListenerTableViewList();
             initTableColumnAll();
             bindingButtonExportInSearchTp();
+            delete(new File(PATH_TEMP_FILE_SCAN));
         });
         bindPaginationToCurrentFile();
         createPaginationPageFactory();
@@ -1208,8 +1211,11 @@ public class PdfViewerController implements Initializable {
             log.error("Произошла ошибка при выборе объектов из Search во вкладке <<Сканирование ТД>>", e);
         } finally {
             S4AppUtil.closeThreadS4App();
-            disableMainWindow(false);
-
+            Platform.runLater(()->{
+                getMainApp().getPrimaryStage().setAlwaysOnTop(true);
+                getMainApp().getPrimaryStage().setAlwaysOnTop(false);
+                disableMainWindow(false);
+            });
         }
     }
 
@@ -1236,7 +1242,11 @@ public class PdfViewerController implements Initializable {
 
     /**Метод сканирования*/
     private void getPdfFromScanner(TextField textFieldDesign,TextField textFieldOtdRegNum,TextField textFieldNumChange,TextField textFieldDesignII,Button button, String name, Long docType){
-        int idTemp,itemTif = 0 ;
+        File pathTemp=new File(PATH_TEMP_FILE_SCAN+SP+new Date().getTime());
+        System.out.println(pathTemp);
+        if (!pathTemp.exists()) pathTemp.mkdirs();
+        //delete(pathTemp);
+        int idTemp;
         S4AppUtil S4AppThread = S4AppUtil.returnAndCreateThreadS4App();
         if (textFieldDesign.getText().length() != STR_FORMAT_TD.length()) {
             Platform.runLater(() -> AlertUtilNew.message("Внимание!", "Заполните поле обозначение.", "Пустое поле обозначение.", Alert.AlertType.WARNING));
@@ -1250,10 +1260,9 @@ public class PdfViewerController implements Initializable {
                 int DPI = preferencesScanKdAndTd.getInt("textFieldDpiScanTd", 450);
                 String fullFileName = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.pdf";
                 String fullFileNameTif = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.tif";
-                File pathTemp=new File(preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP+"tempScanAr");
-                pathTemp.mkdirs();
+                //if (pathTemp.list().length!=0) delete(pathTemp);
                 String strTempTif=pathTemp.getAbsolutePath()+SP+"tempScan";
-                System.out.println(pathTemp+"темп папка для скана");
+                //System.out.println(pathTemp+"темп папка для скана");
                 long archive = preferencesScanKdAndTd.getLong("textFieldArchiveIdTd", 323);
                 while (!flagScan){
                     S4AppThread.getImageFromScanner(S4AppThread, strTempTif+""+ pathTemp.listFiles().length +".tif", -1, 0, DPI, 1, false, false, false, false);
@@ -1266,22 +1275,24 @@ public class PdfViewerController implements Initializable {
                         }
                     });
                     while(!flagScanPlatform){
-                        try {
+                        /*try {
                             Thread.currentThread().sleep(100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
-                        }
+                        }*/
                     }flagScanPlatform=false;
                 }flagScan=false;
                 //создаю новый файл с расширением PDF
                 File file = new File(convertTiff2Pdf(fullFileNameTif,pathTemp.listFiles()));
                 if (!file.exists()) file.createNewFile();
                 //удаляю папку с файлами
-                delete(pathTemp);
-                pathTemp.delete();
+
+                //pathTemp.delete();
                 //удаляю файл с расширением тиф
                 //delete(new File(fullFileNameTif));
+                System.out.println("tut");
                 long id = S4AppThread.createFileDocumentWithDocType(S4AppThread, fullFileName, docType, archive, design, name, SECTION_ID);//создаю документ
+                System.out.println(id +"    "+ fullFileName);
                 if (id>0) {
                     listDocIdScan.add(id);
                     //S4AppThread.openDocument(S4AppThread, id);
@@ -1295,7 +1306,7 @@ public class PdfViewerController implements Initializable {
                     S4AppThread.checkIn(S4AppThread);
                     S4AppThread.closeDocument(S4AppThread);
                 }
-            }catch(IOException e){
+            }catch(Exception e){
                 e.printStackTrace();
                 log.error("Ошибка при удалении темп файла.",e);
             } finally {
@@ -1311,30 +1322,37 @@ public class PdfViewerController implements Initializable {
             }
         }
     }
-
+    /**удаление всех файлов и самой папки*/
     private static void delete(File file){
-        if(!file.exists())
-            return;
-        if(file.isDirectory()){
-            for(File f : file.listFiles())
-                delete(f);
-            file.delete();
-        }else{
-            file.delete();
+        try {
+            if(!file.exists())
+                return;
+            if(file.isDirectory()){
+                for(File f : file.listFiles())
+                    delete(f);
+                file.delete();
+            }else{
+                file.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     /**Метод конвертации тиф в pdf*/
-    private static String convertTiff2Pdf(String tiff,File[] file) {
+    private static String convertTiff2Pdf(String tiff,File[] file) throws IOException {
         // target path PDF
         String pdf = null;
+        RandomAccessFileOrArray ra=null;
+        Document document=null;
+        OutputStream faPdf=null;
         try {
             pdf = tiff.substring(0, tiff.lastIndexOf('.') + 1) + "pdf";
             // новый документ в формате А4
-            Document document = new Document(PageSize.LETTER, 0, 0, 0, 0);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdf));
+            document= new Document(PageSize.LETTER, 0, 0, 0, 0);
+            faPdf=new BufferedOutputStream(new FileOutputStream(pdf));
+            PdfWriter writer = PdfWriter.getInstance(document, faPdf);
             document.open();
             PdfContentByte cb = writer.getDirectContent();
-            RandomAccessFileOrArray ra=null;
             for (int i = 0; i <file.length ; i++) {
                 //int comps = 0;
                 ra = new RandomAccessFileOrArray(file[i].getAbsolutePath());
@@ -1349,12 +1367,17 @@ public class PdfViewerController implements Initializable {
                         document.newPage();
                     }
             }
-            ra.close();
-            document.close();
         } catch (Exception e) {
             e.printStackTrace();
             log.error("Ошибка при ковертации файла tif в pdf",e);
             pdf = null;
+        }finally {
+            faPdf.flush();
+            System.out.println(document);
+            //if (faPdf!=null) faPdf.close();
+            if (ra!=null) ra.close();
+            System.out.println(document);
+            if (document!=null)document.close();
         }
         return pdf;
     }
@@ -1458,15 +1481,9 @@ public class PdfViewerController implements Initializable {
             switch (list.get(i).getClass().getSimpleName()){
                 case "TextField":
                     TextField temp=(TextField)list.get(i);
-                    if (temp!=null && temp.getTextFormatter()!=null && temp.getTextFormatter().getValue().equals("В25.")){
+                    if (temp!=null && temp.getTextFormatter()!=null && temp.getLength()>4 &&  temp.getTextFormatter().getValue().toString().substring(0,4).equals("В25.")){
                         temp.setText("В25.");
                     }else temp.clear();
-                    break;
-                case "MapSketch":
-                    ((MapSketch)list.get(i)).clearAllMapSketch();
-                    break;
-                case "NumberSheet":
-                    ((NumberSheet)list.get(i)).clearAllNumberSheet();
                     break;
                 case "VBox":
                     clearAll(((VBox)list.get(i)).getChildren());
@@ -1475,7 +1492,7 @@ public class PdfViewerController implements Initializable {
                     clearAll(((HBox)list.get(i)).getChildren());
                     break;
                 case "TableView":
-                    clearAll(((TableView)list.get(i)).getItems());
+                    ((TableView)list.get(i)).getItems().clear();
                     break;
             }
         }

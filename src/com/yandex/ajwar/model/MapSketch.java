@@ -83,21 +83,12 @@ public class MapSketch {
         this.textFieldDesignIIMapSketchTd.set(textFieldDesignIIMapSketchTd);
     }
 
-    public void setDisableAll(boolean flag){
+    public void setDisableAll(boolean flag) {
         this.buttonScan.get().setDisable(flag);
         this.textFieldDesignMapSketch.get().setDisable(flag);
         this.textFieldDesignIIMapSketchTd.get().setDisable(flag);
         this.textFieldNumChangeMapSketchTd.get().setDisable(flag);
         this.textFieldOtdRegNumMapSketch.get().setDisable(flag);
-    }
-    public void clearAllMapSketch(){
-        //this.textFieldDesignMapSketch.get().clear();
-        if (this.textFieldDesignMapSketch.get().getTextFormatter().getValue().equals("В25.")) {
-            this.textFieldDesignMapSketch.get().setText("В25.");
-        } else this.textFieldDesignMapSketch.get().clear();
-        this.textFieldDesignIIMapSketchTd.get().clear();
-        this.textFieldNumChangeMapSketchTd.get().clear();
-        this.textFieldOtdRegNumMapSketch.get().clear();
     }
 }
 
