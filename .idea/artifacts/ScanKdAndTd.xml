@@ -1,0 +1,24 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" build-on-make="true" name="ScanKdAndTd">
+    <output-path>$PROJECT_DIR$/out/artifacts/ScanKdAndTd</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="com.yandex.ajwar.MainApp" />
+        <option name="description" value="" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="title" value="" />
+        <option name="vendor" value="" />
+        <option name="version" value="" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="ScanKdAndTd.jar">
+        <element id="module-output" name="ScanKdAndTd" />
+        <element id="library" level="project" name="itextpdf-5.4.0" />
+        <element id="library" level="project" name="jacob" />
+        <element id="library" level="project" name="log4j-1.2.17" />
+        <element id="library" level="project" name="PDFRenderer-0.9.1.proba" />
+      </element>
+    </root>
+  </artifact>
+</component>

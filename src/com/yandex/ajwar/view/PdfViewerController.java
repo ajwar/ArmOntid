@@ -1497,6 +1497,14 @@ public class PdfViewerController implements Initializable {
             }
         }
     }
+    /**Очистка все текстфилдов на форме КД*/
+    private void clearAllKd(){
+        textAreaName.clear();
+        textAreaNote.clear();
+        textFieldNumberChange.clear();
+        textFieldDopNumberPdfView.setText("");
+
+    }
     /**Слушатель для блокировки и разблокировки кнопки 'Занести в Search'*/
     private void bindingButtonExportInSearchTp(){
         BooleanBinding booleanBinding= textFieldDesignPathMapTd.textProperty().length().isNotEqualTo(STR_FORMAT_TD.length())

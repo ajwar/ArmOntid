@@ -174,18 +174,24 @@
                                                                                     </children>
                                                                                 </HBox>
                                                             <Label alignment="CENTER" prefHeight="10.0" prefWidth="300.0" />
-                                                                                <Button fx:id="buttonExportInSearch" alignment="CENTER" disable="true" mnemonicParsing="false" onAction="#exportInSearch" prefHeight="25.0" styleClass="custom-button" text="Экспорт в Search">
-                                                               <graphic>
-                                                                  <ImageView cache="true" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@../../../../resources/images/add_doc_in_search.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                               <tooltip>
-                                                                  <Tooltip text="Экспорт в Search с выбранными параметрами." />
-                                                               </tooltip>
-                                                            </Button>
+                                                            <HBox>
+                                                               <children>
+                                                                                      <Button fx:id="buttonExportInSearch" alignment="CENTER" disable="true" mnemonicParsing="false" onAction="#exportInSearch" prefHeight="25.0" styleClass="custom-button" text="Экспорт в Search">
+                                                                     <graphic>
+                                                                        <ImageView cache="true" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                                           <image>
+                                                                              <Image url="@../../../../resources/images/add_doc_in_search.png" />
+                                                                           </image>
+                                                                        </ImageView>
+                                                                     </graphic>
+                                                                     <tooltip>
+                                                                        <Tooltip text="Экспорт в Search с выбранными параметрами." />
+                                                                     </tooltip>
+                                                                  </Button>
+                                                                  <Label minWidth="60.0" />
+                                                                  <Button minWidth="100.0" mnemonicParsing="false" styleClass="custom-button" text="Очистить все" />
+                                                               </children>
+                                                            </HBox>
                                                                             </children>
                                                                         </VBox>
                                                                     </children>
@@ -275,18 +281,24 @@
                                                                                     </children>
                                                                                 </Pane>
                                                                                 <Label minHeight="12.0" />
-                                                                                <Button fx:id="buttonAddVersionInSearch" disable="true" mnemonicParsing="false" onAction="#addVersionInSearch" prefHeight="25.0" styleClass="custom-button" text="Добавить версию">
-                                                               <graphic>
-                                                                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                                                     <image>
-                                                                        <Image url="@../../../../resources/images/add_doc_version_in_search.png" />
-                                                                     </image>
-                                                                  </ImageView>
-                                                               </graphic>
-                                                               <tooltip>
-                                                                  <Tooltip text="Добавляет версию в Search с выбранными параметрами." />
-                                                               </tooltip>
-                                                            </Button>
+                                                            <HBox>
+                                                               <children>
+                                                                                      <Button fx:id="buttonAddVersionInSearch" disable="true" mnemonicParsing="false" onAction="#addVersionInSearch" prefHeight="25.0" styleClass="custom-button" text="Добавить версию">
+                                                                     <graphic>
+                                                                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                                                                           <image>
+                                                                              <Image url="@../../../../resources/images/add_doc_version_in_search.png" />
+                                                                           </image>
+                                                                        </ImageView>
+                                                                     </graphic>
+                                                                     <tooltip>
+                                                                        <Tooltip text="Добавляет версию в Search с выбранными параметрами." />
+                                                                     </tooltip>
+                                                                  </Button>
+                                                                  <Label minWidth="60.0" />
+                                                                  <Button minWidth="100.0" mnemonicParsing="false" styleClass="custom-button" text="Очистить все" />
+                                                               </children>
+                                                            </HBox>
                                                                             </children>
                                                          <padding>
                                                             <Insets right="6.0" />
