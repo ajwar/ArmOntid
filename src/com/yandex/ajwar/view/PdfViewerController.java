@@ -1243,7 +1243,6 @@ public class PdfViewerController implements Initializable {
     /**Метод сканирования*/
     private void getPdfFromScanner(TextField textFieldDesign,TextField textFieldOtdRegNum,TextField textFieldNumChange,TextField textFieldDesignII,Button button, String name, Long docType){
         File pathTemp=new File(PATH_TEMP_FILE_SCAN+SP+new Date().getTime());
-        System.out.println(pathTemp);
         if (!pathTemp.exists()) pathTemp.mkdirs();
         //delete(pathTemp);
         int idTemp;
@@ -1275,24 +1274,12 @@ public class PdfViewerController implements Initializable {
                         }
                     });
                     while(!flagScanPlatform){
-                        /*try {
-                            Thread.currentThread().sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }*/
                     }flagScanPlatform=false;
                 }flagScan=false;
                 //создаю новый файл с расширением PDF
                 File file = new File(convertTiff2Pdf(fullFileNameTif,pathTemp.listFiles()));
                 if (!file.exists()) file.createNewFile();
-                //удаляю папку с файлами
-
-                //pathTemp.delete();
-                //удаляю файл с расширением тиф
-                //delete(new File(fullFileNameTif));
-                System.out.println("tut");
                 long id = S4AppThread.createFileDocumentWithDocType(S4AppThread, fullFileName, docType, archive, design, name, SECTION_ID);//создаю документ
-                System.out.println(id +"    "+ fullFileName);
                 if (id>0) {
                     listDocIdScan.add(id);
                     //S4AppThread.openDocument(S4AppThread, id);
@@ -1498,12 +1485,20 @@ public class PdfViewerController implements Initializable {
         }
     }
     /**Очистка все текстфилдов на форме КД*/
+    @FXML
     private void clearAllKd(){
         textAreaName.clear();
         textAreaNote.clear();
         textFieldNumberChange.clear();
         textFieldDopNumberPdfView.setText("");
-
+        if (textFieldDesignation.getTextFormatter()==null) {
+            textFieldDesignation.clear();
+        }else {
+            if (textFieldDesignation.getText().indexOf("ВИЕЛ.")!=-1) textFieldDesignation.setText("ВИЕЛ.");
+            else if (textFieldDesignation.getText().indexOf("ЭСКИЗ-")!=-1) textFieldDesignation.setText("ЭСКИЗ-");
+            else if (textFieldDesignation.getText().indexOf("Э-")!=-1) textFieldDesignation.setText("Э-");
+            else textFieldDesignation.setText("");
+        }
     }
     /**Слушатель для блокировки и разблокировки кнопки 'Занести в Search'*/
     private void bindingButtonExportInSearchTp(){

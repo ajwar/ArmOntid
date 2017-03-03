@@ -189,7 +189,7 @@
                                                                      </tooltip>
                                                                   </Button>
                                                                   <Label minWidth="60.0" />
-                                                                  <Button minWidth="100.0" mnemonicParsing="false" styleClass="custom-button" text="Очистить все" />
+                                                                  <Button minWidth="100.0" mnemonicParsing="false" onAction="#clearAllKd" styleClass="custom-button" text="Очистить все" />
                                                                </children>
                                                             </HBox>
                                                                             </children>
@@ -296,7 +296,7 @@
                                                                      </tooltip>
                                                                   </Button>
                                                                   <Label minWidth="60.0" />
-                                                                  <Button minWidth="100.0" mnemonicParsing="false" styleClass="custom-button" text="Очистить все" />
+                                                                  <Button minWidth="100.0" mnemonicParsing="false" onAction="#clearAllKd" styleClass="custom-button" text="Очистить все" />
                                                                </children>
                                                             </HBox>
                                                                             </children>
