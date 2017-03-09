@@ -386,6 +386,7 @@
                                     <center>
                                         <Pagination fx:id="pagination" styleClass="circle-pagination" BorderPane.alignment="CENTER">
                                             <opaqueInsets>
+
                                                 <Insets />
                                             </opaqueInsets>
                                             <contextMenu>

@@ -101,6 +101,7 @@ public class MainApp extends Application {
             //getPrimaryStage().initStyle(StageStyle.UNDECORATED);
             setMainWindowController(loader.getController());
             getMainWindowController().setMainApp(this);
+
         } catch (IOException e) {
             log.error("Ошибка при загрузке главной формы(MainWindow.fxml).",e);
             e.printStackTrace();

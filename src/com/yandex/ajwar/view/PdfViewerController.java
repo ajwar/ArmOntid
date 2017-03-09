@@ -1156,6 +1156,7 @@ public class PdfViewerController implements Initializable {
                 for (int i = 0; i <listDocIdScan.size() ; i++) {
                     //link=S4AppThread.linkDocVersionToArticleVersion(S4AppThread,artId,0,listDocIdScan.get(i),0,1,0);
                     link=S4AppThread.linkDocToArticle(S4AppThread,artId,listDocIdScan.get(i),1,0);
+
                     if (link==0 && !"".equals(S4AppThread.getDocFilename(S4AppThread,listDocIdScan.get(i)))) text+="Произошла ошибка при включении документации с айди="+listDocIdScan.get(i)+" на объект с арт. айди="+artId+"\r\n";
                     link=0;
                 }
