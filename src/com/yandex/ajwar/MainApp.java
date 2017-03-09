@@ -93,7 +93,7 @@ public class MainApp extends Application {
             getPrimaryStage().setScene(scene);
             //минимальные размеры основной формы
             getPrimaryStage().setMinHeight(830);
-            getPrimaryStage().setMinWidth(1050);
+            getPrimaryStage().setMinWidth(1100);
             getPrimaryStage().setOnCloseRequest(event -> {
                 log.info("Юзер " + System.getProperty("user.name") + " завершил работу программы ScanKdAndTd.");
                 System.exit(0);

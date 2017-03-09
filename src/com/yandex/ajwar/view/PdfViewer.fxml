@@ -619,6 +619,16 @@
                         <Button layoutX="10.0" layoutY="10.0" minWidth="130.0" mnemonicParsing="false" onAction="#enableButtonAndTextfield" text="Разблокировать все" />
                      </children>
                   </VBox>
+                  <VBox layoutX="954.0" layoutY="182.0" spacing="5.0">
+                     <children>
+                        <Label minHeight="25.0" text="Формат страницы:" />
+                        <ComboBox fx:id="comboBoxPaperSize" minWidth="60.0" styleClass="comboBoxPdfView">
+                           <VBox.margin>
+                              <Insets left="20.0" />
+                           </VBox.margin>
+                        </ComboBox>
+                     </children>
+                  </VBox>
                </children></AnchorPane>
             </content>
         </Tab>

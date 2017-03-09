@@ -1,7 +1,7 @@
 package com.yandex.ajwar.view;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.PageSize;
+import com.itextpdf.text.*;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.RandomAccessFileOrArray;
@@ -105,6 +105,10 @@ public class PdfViewerController implements Initializable {
             "БСУ",
             "БПП",
             "ГрТиС"};
+    private final String[] arrayPaperSize={
+            "A4",
+            "A3",
+            "A2"};
 
     @FXML
     private Pagination pagination;
@@ -176,6 +180,8 @@ public class PdfViewerController implements Initializable {
     private ComboBox<String> comboBoxFormatPdfViewController;
     @FXML
     private ComboBox<String> comboBoxBuroOgtTd;
+    @FXML
+    private ComboBox<String> comboBoxPaperSize;
     @FXML
     private TextField textFieldDesignation;
     @FXML
@@ -799,9 +805,11 @@ public class PdfViewerController implements Initializable {
                 comboBoxChangeReasonPdfViewController.setItems(list);
                 comboBoxChangeReasonPdfViewController.getSelectionModel().select(1);
     }
-    private void containComboBoxBuroOgtTd(){
+    private void containComboBoxBuroOgtTd() {
         comboBoxBuroOgtTd.getItems().addAll(arrayBuroOgt);
         comboBoxBuroOgtTd.getSelectionModel().select(0);
+        comboBoxPaperSize.getItems().addAll(arrayPaperSize);
+        comboBoxPaperSize.getSelectionModel().select(0);
     }
 
     // ************ Initialization *************
@@ -976,7 +984,7 @@ public class PdfViewerController implements Initializable {
                 Graphics2D g2d = buffImage.createGraphics();
                 g2d.drawImage(awtImage, at, null);
                 // конвертирую буфферное изображение в картинку Java FX:
-                Image image = SwingFXUtils.toFXImage(buffImage, null);
+                javafx.scene.image.Image image = SwingFXUtils.toFXImage(buffImage, null);
                 // wrap in image view and return:
                 ImageView imageView = new ImageView(image);
                 imageView.setPreserveRatio(true);
@@ -1148,7 +1156,7 @@ public class PdfViewerController implements Initializable {
                 for (int i = 0; i <listDocIdScan.size() ; i++) {
                     //link=S4AppThread.linkDocVersionToArticleVersion(S4AppThread,artId,0,listDocIdScan.get(i),0,1,0);
                     link=S4AppThread.linkDocToArticle(S4AppThread,artId,listDocIdScan.get(i),1,0);
-                    if (link==0) text+="Произошла ошибка при включении документации с айди="+listDocIdScan.get(i)+" на объект с арт. айди="+artId+"\r\n";
+                    if (link==0 && !"".equals(S4AppThread.getDocFilename(S4AppThread,listDocIdScan.get(i)))) text+="Произошла ошибка при включении документации с айди="+listDocIdScan.get(i)+" на объект с арт. айди="+artId+"\r\n";
                     link=0;
                 }
                 progInd.setProgress(1.0d);
@@ -1255,8 +1263,22 @@ public class PdfViewerController implements Initializable {
             disableMainWindow(true);
             try {
                 Platform.runLater(()->progressIndicatorAlways());
+                int paperSize;
+                com.itextpdf.text.Rectangle rect;
+                String selectPaper=comboBoxPaperSize.getSelectionModel().getSelectedItem();
+                if ("A4".equals(selectPaper)) {
+                    rect=PageSize.LETTER;
+                    paperSize=1;
+                }else if ("A3".equals(selectPaper)) {
+                    rect=PageSize.A3;
+                    paperSize=11;
+                }else {
+                    rect=PageSize.A2;
+                    paperSize=21;
+                }
                 String design = textFieldDesign.getText();
                 int DPI = preferencesScanKdAndTd.getInt("textFieldDpiScanTd", 450);
+                //int DPI = 600;
                 String fullFileName = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.pdf";
                 String fullFileNameTif = preferencesScanKdAndTd.get("textFieldFolderScanTd", USER_HOME) + SP + design + " Скан.tif";
                 //if (pathTemp.list().length!=0) delete(pathTemp);
@@ -1264,7 +1286,7 @@ public class PdfViewerController implements Initializable {
                 //System.out.println(pathTemp+"темп папка для скана");
                 long archive = preferencesScanKdAndTd.getLong("textFieldArchiveIdTd", 323);
                 while (!flagScan){
-                    S4AppThread.getImageFromScanner(S4AppThread, strTempTif+""+ pathTemp.listFiles().length +".tif", -1, 0, DPI, 1, false, false, false, false);
+                    S4AppThread.getImageFromScanner(S4AppThread, strTempTif+""+ pathTemp.listFiles().length +".tif", -1, 0, DPI, paperSize, false, false, false, false);
                     Platform.runLater(()->{
                         Optional<ButtonType> result=AlertUtilNew.message("Сканирование документации.","Продолжить сканирование?","Выбор сканирования.", Alert.AlertType.CONFIRMATION);
                         if (result.get()==ButtonType.OK){
@@ -1277,7 +1299,7 @@ public class PdfViewerController implements Initializable {
                     }flagScanPlatform=false;
                 }flagScan=false;
                 //создаю новый файл с расширением PDF
-                File file = new File(convertTiff2Pdf(fullFileNameTif,pathTemp.listFiles()));
+                File file = new File(convertTiff2Pdf(fullFileNameTif,pathTemp.listFiles(),rect));
                 if (!file.exists()) file.createNewFile();
                 long id = S4AppThread.createFileDocumentWithDocType(S4AppThread, fullFileName, docType, archive, design, name, SECTION_ID);//создаю документ
                 if (id>0) {
@@ -1326,7 +1348,7 @@ public class PdfViewerController implements Initializable {
         }
     }
     /**Метод конвертации тиф в pdf*/
-    private static String convertTiff2Pdf(String tiff,File[] file) throws IOException {
+    private static String convertTiff2Pdf(String tiff, File[] file, Rectangle size) throws IOException {
         // target path PDF
         String pdf = null;
         RandomAccessFileOrArray ra=null;
@@ -1335,7 +1357,8 @@ public class PdfViewerController implements Initializable {
         try {
             pdf = tiff.substring(0, tiff.lastIndexOf('.') + 1) + "pdf";
             // новый документ в формате А4
-            document= new Document(PageSize.LETTER, 0, 0, 0, 0);
+            //document= new Document(PageSize.LETTER, 0, 0, 0, 0);
+            document= new Document(size, 0, 0, 0, 0);
             faPdf=new BufferedOutputStream(new FileOutputStream(pdf));
             PdfWriter writer = PdfWriter.getInstance(document, faPdf);
             document.open();
@@ -1360,10 +1383,7 @@ public class PdfViewerController implements Initializable {
             pdf = null;
         }finally {
             faPdf.flush();
-            System.out.println(document);
-            //if (faPdf!=null) faPdf.close();
             if (ra!=null) ra.close();
-            System.out.println(document);
             if (document!=null)document.close();
         }
         return pdf;
@@ -1374,7 +1394,6 @@ public class PdfViewerController implements Initializable {
         TextField textField=new TextField();
         Tooltip tooltip=new Tooltip(TOOLTIP_STR_FORMAT_TD);
         textField.setTooltip(tooltip);
-        //textField.setTextFormatter(TextFormatterUtil.gTextFormatter(STR_FORMAT_TD,textField));
         tableViewNumberSheet.getItems().add(new NumberSheet(textField));
     }
     /**удаляется строка из таблицы Объектов*/
@@ -1504,7 +1523,6 @@ public class PdfViewerController implements Initializable {
     private void bindingButtonExportInSearchTp(){
         BooleanBinding booleanBinding= textFieldDesignPathMapTd.textProperty().length().isNotEqualTo(STR_FORMAT_TD.length())
                 .or(Bindings.size(tableViewObjectTp.getItems()).isEqualTo(0));
-        //BooleanBinding booleanBinding=(textFieldDesignPathMapTd.disableProperty().not())
         buttonExportInSearchTp.disableProperty().bind(booleanBinding);
 
     }
