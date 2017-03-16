@@ -1176,6 +1176,7 @@ public class PdfViewerController implements Initializable {
             });
             listDocIdScan.clear();
             disableMainWindow(false);
+
             S4AppUtil.closeThreadS4App();
         }
     }
